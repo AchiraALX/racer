@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Racer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/racer.css') }}">
+    <title>Racer</title>
+</head>
+<header>
+    <div class="w3-display">
+        <div class="w3-left">Home</div>
+        <div class="w3-right">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('racer_auth.logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('racer_auth.login') }}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+<main>
+    <body>
+        <div class="container">
+            <!-- flashed messages -->
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-info" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</main>
+<footer>
+    <div class="row">
+        <div class="col-md-6 w3-center">
+            <!--  Copyright goes here -->
+            <p id="copy"></p>
+        </div>
+        <div class="col-md-6 w3-center">
+            <!-- Important links go here -->
+            <a href=""><i class="bi bi-question-circle"></i>  About</a> &nbsp; &nbsp;
+            <a href=""> <span><i class="bi bi-person-raised-hand"></i></span> Help</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const copy = document.getElementById('copy');
+    copy.innerHTML = '&copy; ' + new Date().getFullYear() + ' Racer';
+</script>
+
+</html>
