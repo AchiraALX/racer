@@ -11,7 +11,8 @@ from flask import (
     redirect,
     url_for
 )
-from flask_login import login_user, logout_user
+from flask_login import login_user, logout_user  # type: ignore
+from sqlalchemy.exc import NoResultFound
 from workers import (
     AddToDBWorker,
     hash_password,
@@ -45,17 +46,18 @@ def login():
 
         if logged:
             from app import load_user
-            user = load_user(email)
-            print(user)
 
             try:
+                user = load_user(email)
                 login_user(user)
 
-            except Exception as e:
-                flash(f"{e}")
+            except NoResultFound:
+                flash("User not found")
                 return redirect(url_for('racer_auth.login'))
+
             return redirect(url_for('index'))
 
+        flash("Invalid email or password")
         return redirect(url_for('racer_auth.login'))
 
     return render_template('login.html')
@@ -66,6 +68,7 @@ def logout():
     """ The racer logout route handler. """
 
     logout_user()
+    return redirect(url_for('racer_auth.login'))
 
 
 @racer_auth.route("/register", methods=["GET", "POST"], strict_slashes=False)

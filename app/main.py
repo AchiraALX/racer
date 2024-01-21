@@ -2,7 +2,7 @@
 
 """ The racer main module. """
 
-from flask import render_template
+from flask import render_template, redirect, url_for, flash
 from . import racer
 
 
@@ -16,3 +16,11 @@ def index():
 def page_not_found(error):
     """ The racer 404 error handler. """
     return f"404 error: {error}", 404
+
+
+@racer.errorhandler(401)
+def unauthorized(error):
+    """ Error handler for unauthorized """
+
+    flash(f"Login before accessing the page. {error}")
+    return redirect(url_for('racer_auth.login'))

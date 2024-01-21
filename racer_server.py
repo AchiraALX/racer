@@ -4,5 +4,6 @@
 
 from app.main import racer
 
+
 if __name__ == "__main__":
     racer.run()

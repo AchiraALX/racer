@@ -12,19 +12,21 @@
 </head>
 <header>
     <div class="w3-display">
-        <div class="w3-left">Home</div>
+        <div class="w3-left w3-large">
+            <a href="{{ url_for('index') }}"> <i class="bi bi-houses-fill"></i> Racer</a>
+        </div>
         <div class="w3-right">
             {% if current_user.is_authenticated %}
-                <a href="{{ url_for('racer_auth.logout') }}">Logout</a>
+                <a href="{{ url_for('racer_auth.logout') }}"> {{ current_user.username.capitalize() }} &nbsp; <i class="bi bi-box-arrow-right"></i></a>
             {% else %}
-                <a href="{{ url_for('racer_auth.login') }}">Login</a>
+                <a href="{{ url_for('racer_auth.login') }}"><i class="bi bi-box-arrow-in-right"></i></a>
             {% endif %}
         </div>
     </div>
 </header>
 <main>
     <body>
-        <div class="container">
+        <div class="container" style="margin-top: 3px;">
             <!-- flashed messages -->
             {% with messages = get_flashed_messages() %}
                 {% if messages %}

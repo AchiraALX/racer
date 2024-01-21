@@ -69,7 +69,7 @@ def authenticate_user(email: str, password: str) -> bool:
 
 
 # Get a user
-def one_user(email: str) -> Dict | None:
+def one_user(email: str) -> Dict:
     """ Query one user from the database """
 
     db = Database()
@@ -77,6 +77,6 @@ def one_user(email: str) -> Dict | None:
         user = db.get_user(email=email)
 
     except NoResultFound:
-        return None
+        raise NoResultFound from NoResultFound
 
-    return user
+    return user.to_dict()
