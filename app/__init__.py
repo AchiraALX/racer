@@ -14,7 +14,7 @@ from workers import one_user
 
 racer = Flask(__name__)
 racer.secret_key = token_urlsafe(16)
-racer.debug = True
+racer.debug = False
 
 racer.register_blueprint(racer_auth)
 
