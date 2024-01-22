@@ -80,3 +80,57 @@ def one_user(email: str) -> Dict:
         raise NoResultFound from NoResultFound
 
     return user.to_dict()
+
+
+# Check if user exists
+def user_exists(email: str) -> bool:
+    """ Check if user exists """
+    db = Database()
+    try:
+        db.get_user(email=email)
+
+    except NoResultFound:
+        raise NoResultFound from NoResultFound
+
+    return True
+
+
+# Update token if user exists
+def update_reset_token(email: str, token: str) -> None:
+    """ Update the reset token """
+
+    # Check if user exists
+    if not user_exists(email):
+        raise NoResultFound from NoResultFound
+
+    db = Database()
+    try:
+        db.update_reset_token(email, token)
+
+    except NoResultFound:
+        raise NoResultFound from NoResultFound
+
+
+# Update password if user exists
+def update_password(token: str, password: str) -> None:
+    """ Update the password """
+    db = Database()
+    try:
+        db.update_password(token, password)
+
+    except NoResultFound:
+        raise NoResultFound from NoResultFound
+
+
+# Check for a valid token
+def valid_token(token: str) -> bool:
+    """ Check for a valid token """
+
+    db = Database()
+    try:
+        db.get_user_by_reset_token(token)
+
+    except NoResultFound:
+        raise NoResultFound from NoResultFound
+
+    return True

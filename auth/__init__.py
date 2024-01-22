@@ -12,11 +12,16 @@ from flask import (
     url_for
 )
 from flask_login import login_user, logout_user  # type: ignore
+import secrets
 from sqlalchemy.exc import NoResultFound
 from workers import (
     AddToDBWorker,
     hash_password,
-    authenticate_user
+    authenticate_user,
+    user_exists,
+    update_reset_token,
+    valid_token,
+    update_password
 )
 
 add = AddToDBWorker()
@@ -51,8 +56,8 @@ def login():
                 login_user(user)
 
             except NoResultFound:
-                flash("User not found")
-                return redirect(url_for('racer_auth.login'))
+                flash("User not found. Sign up to continue")
+                return redirect(url_for('racer_auth.register'))
 
             return redirect(url_for('index'))
 
@@ -116,3 +121,82 @@ def register():
             return redirect(url_for('racer_auth.register'))
 
     return render_template('sign-up.html')
+
+
+@racer_auth.route(
+    "/reset-token", methods=["GET", "POST"], strict_slashes=False)
+def reset_token():
+    """ The racer reset password route handler. """
+
+    if request.method == 'POST':
+        email = request.form.get("email")
+
+        if not email:
+            flash("Email is required")
+            return redirect(url_for('racer_auth.reset_token'))
+
+        try:
+            user_exists(email)
+            token = secrets.token_hex(16)
+
+            try:
+                update_reset_token(email, token)
+                flash("Reset token sent to your email")
+                return redirect(
+                    url_for('racer_auth.save_new_password', token=token))
+
+            except NoResultFound:
+                flash("User not found")
+                return redirect(url_for('racer_auth.reset_token'))
+
+        except NoResultFound:
+            flash("User not found")
+            return redirect(
+                url_for('racer_auth.reset_token'))
+
+    return render_template('reset-password.html')
+
+
+@racer_auth.route(
+    "/update-password/<token>", methods=["GET", "POST"], strict_slashes=False)
+def save_new_password(token):
+    """ The racer reset route handler. """
+
+    if not token:
+        flash("Invalid token")
+        return redirect(url_for('racer_auth.reset_token'))
+
+    if request.method == 'POST':
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm-password")
+
+        if not password:
+            flash("Password is required")
+            return redirect(
+                url_for('racer_auth.save_new_password', token=token))
+
+        if not confirm_password:
+            flash("Confirm Password is required")
+            return redirect(
+                url_for('racer_auth.save_new_password', token=token))
+
+        if password != confirm_password:
+            flash("Passwords do not match")
+            return redirect(
+                url_for('racer_auth.save_new_passwords', token=token))
+
+        try:
+            # Check if token exists
+            if not valid_token(token):
+                flash("Invalid token")
+                return redirect(url_for('racer_auth.reset_token', token=token))
+
+            flash("Updating password")
+            update_password(token, hash_password(password))
+            return redirect(url_for('racer_auth.login'))
+
+        except NoResultFound:
+            flash("User not found problem")
+            return redirect(url_for('racer_auth.reset_token'))
+
+    return render_template('new-password.html', token=token)

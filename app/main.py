@@ -3,6 +3,7 @@
 """ The racer main module. """
 
 from flask import render_template, redirect, url_for, flash
+from flask_login import login_required
 from . import racer
 
 
@@ -10,6 +11,13 @@ from . import racer
 def index():
     """ The racer index route handler. """
     return render_template("racer.html")
+
+
+@racer.route("/profile", methods=["GET"], strict_slashes=False)
+@login_required
+def profile():
+    """ The racer profile route handler. """
+    return render_template("profile.html")
 
 
 @racer.errorhandler(404)

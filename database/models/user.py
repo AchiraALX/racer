@@ -27,6 +27,10 @@ class User(Base):
         String(128), nullable=False
     )
 
+    password_reset_token: Mapped[str] = mapped_column(
+        String(128), nullable=True
+    )
+
     def to_dict(self):
         """ Return dictionary representation """
 
