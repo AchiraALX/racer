@@ -4,7 +4,7 @@
 """ The workers module. """
 
 
-from typing import Dict
+from typing import Dict, Optional
 
 from bcrypt import hashpw, checkpw, gensalt
 from sqlalchemy.exc import NoResultFound, IntegrityError
@@ -15,7 +15,7 @@ from database.database import Database
 class AddToDBWorker():
     """ The add user worker class. """
 
-    def add_user(self, user: Dict) -> Dict | None:
+    def add_user(self, user: Dict) -> Optional[Dict]:
         """ Add user worker runner """
         _user = User(**user)
         db = Database()

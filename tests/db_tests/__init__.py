@@ -4,15 +4,17 @@
 
 
 import unittest
-from db import DBStorage
+from database import DBStorage
 
 
-class TestDB(unittest.TestCase):
+class TestDatabase(unittest.TestCase):
     """ Test db class """
 
-    def test_db(self):
+    def test_database(self):
         """ Test db """
         db = DBStorage()
         self.assertIsNotNone(db.engine)
 
 
+if __name__ == "__main__":
+    unittest.main()

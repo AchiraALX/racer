@@ -42,7 +42,6 @@ def login():
             return redirect(url_for('racer_auth.login'))
 
         logged = authenticate_user(email, password)
-        print(logged)
 
         if logged:
             from app import load_user

@@ -90,3 +90,7 @@ header {
 #forgot div {
     flex: 1 0 auto;
 }
+
+.h-icon {
+    font-size: large;
+}
