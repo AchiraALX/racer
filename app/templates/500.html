@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section>
+    <div>
+        <h1>Its not you. Its us</h1>
+        <p> {{ error }} </p>
+    </div>
+</section>
+
+<section>
+    <div>
+        <p>Jump back <a href="{{ url_for('index') }}">home</a></p>
+    </div>
+</section>
+{% endblock %}

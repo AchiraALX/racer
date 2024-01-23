@@ -4,7 +4,6 @@
 
 import json
 
-
 # Global variables
 connected_clients = {}
 connected_hosts = {}
@@ -18,7 +17,7 @@ async def error(websocket, message: str) -> None:
         'message': message
     }
 
-    await websocket.send_json(body)
+    await websocket.send(body)
 
 
 async def add_client(websocket, token: str) -> None:
@@ -38,17 +37,8 @@ async def connect(websocket):
     """ Handle new websocket connection """
 
     message = await websocket.recv()
-    event = json.loads(message)
-    assert event['type'] == 'connect'
+    _message = json.loads(message)
 
-    # Check if client is already connected
-    if event['client_id'] in connected_clients:
-        await error(websocket, 'Client already connected')
-        return
+    _message['state'] = 'connected'
 
-    # Check if host is already connected
-    if event['host_id'] in connected_hosts:
-        await error(websocket, 'Host already connected')
-        return
-
-    websocket.send_json({'hello': "There my name is"})
+    await websocket.send(json.dumps(_message))

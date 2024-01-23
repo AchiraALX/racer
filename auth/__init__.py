@@ -12,7 +12,7 @@ from flask import (
     redirect,
     url_for
 )
-from flask_login import login_user, logout_user  # type: ignore
+from flask_login import login_user, logout_user, current_user  # type: ignore
 from sqlalchemy.exc import NoResultFound, DBAPIError
 from workers import (
     AddToDBWorker,
@@ -33,6 +33,9 @@ racer_auth = Blueprint("racer_auth", __name__, url_prefix="/auth")
 @racer_auth.route("/", methods=["GET", "POST"], strict_slashes=False)
 def login():
     """ The racer login route handler. """
+
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
 
     if request.method == "POST":
         email = request.form.get("email")
@@ -59,7 +62,7 @@ def login():
                 flash("User not found. Sign up to continue")
                 return redirect(url_for('racer_auth.register'))
 
-            return redirect(url_for('index'))
+            return redirect(url_for('dashboard'))
 
         flash("Invalid email or password")
         return redirect(url_for('racer_auth.login'))
@@ -78,6 +81,9 @@ def logout():
 @racer_auth.route("/register", methods=["GET", "POST"], strict_slashes=False)
 def register():
     """ The racer register route handler. """
+
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
 
     if request.method == 'POST':
         username = request.form.get("username")

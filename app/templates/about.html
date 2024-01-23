@@ -5,8 +5,40 @@
 <!-- Your content here -->
 
 {% block content %}
-    <h1>About Racer</h1>
-    <p>Racer is a fast and exciting racing game that will keep you on the edge of your seat.</p>
-    <p>Experience high-speed races, challenging tracks, and intense competition.</p>
+<section>
+    <h2 class="w3-border-bottom w3-padding">About US</h2>
+    <p class="w3-padding">
+        Welcome to Racer, where we're not just about chat – we're about transforming the way businesses communicate.
+        Dive into a world of seamless integration, advanced security, and real-time messaging that propels your
+        collaboration to new heights.
+    </p>
+</section>
+
+<section>
+    <h2 class="w3-border-bottom w3-padding">Key Features</h2>
+    <ul>
+        <li class="w3-padding">🚀 Seamless Integration</li>
+        <li class="w3-padding">🔐 Advanced Security</li>
+        <li class="w3-padding">🌐 Real-Time Bidirectional Messaging</li>
+        <li class="w3-padding">📧 Flask Mail Integration</li>
+    </ul>
+</section>
+
+<section>
+    <h2>Get Started</h2>
+    <p>
+        Ready to supercharge your business conversations? Join Racer today and experience a chat revolution like
+        never before.
+    </p>
+
+    {% if current_user.is_authenticated %}
+    <!-- Thank you for choosing racer -->
+    <div class="w3-center w3-padding">
+        Thank you for choosing racer!
+    </div>
+    {% else %}
+    <a href="{{ url_for('racer_auth.register') }}" class="cta-button">Sign Up Now</a>
+    {% endif %}
+</section>
 
 {% endblock %}

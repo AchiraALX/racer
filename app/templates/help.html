@@ -5,6 +5,34 @@
 <!-- Your content here -->
 
 {% block content %}
-    <h1>Help</h1>
-    <p>Help is on the way!</p>
+    <h3 class="w3-center">Leave a feedback</h3>
+    <form action="">
+        <div class="form-group">
+            <label for="email">Email address</label>
+            {% if current_user.is_authenticated %}
+                <input type="text" value="{{ current_user.email }}" class="form-control" id="email" aria-describedby="emailHelp" readonly>
+            {% else %}
+                <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+            {% endif %}
+            <small id="emailHelp" class="form-text text-muted">Your email cannot be changed.</small>
+        </div>
+        <div class="form-group">
+            <label for="feedback">Feedback</label>
+            <textarea class="form-control" id="feedback" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <br>
+    <h3 class="w3-border-bottom w3-padding" style="font-weight: 800;">FAQ</h3>
+    <div class="w3-padding">
+        <div class="w3-margin w3-padding">
+            <h5 class="w3-border-bottom" style="width: fit-content;">What is Racer?</h5>
+        <p>
+            Racer is a web application the will provide a seamless
+            experience for bussinesses that are looking to intergrate
+            chatting functionality into their websites and applications.
+        </p>
+        </div>
+
+    </div>
 {% endblock %}

@@ -42,10 +42,18 @@ def profile():
     return render_template("profile.html")
 
 
+# Dashboard
+@racer.route("/dashboard", methods=["GET"], strict_slashes=False)
+@login_required
+def dashboard():
+    """ The racer dashboard route handler. """
+    return render_template("dashboard.html")
+
+
 @racer.errorhandler(404)
 def page_not_found(error):
     """ The racer 404 error handler. """
-    return f"404 error: {error}", 404
+    return render_template('404.html', error=error)
 
 
 @racer.errorhandler(401)
@@ -54,3 +62,10 @@ def unauthorized(error):
 
     flash(f"Login before accessing the page. {error}")
     return redirect(url_for('racer_auth.login'))
+
+
+@racer.errorhandler(500)
+def server_error(error):
+    """ The racer 500 errror """
+
+    return render_template('500.html', error=error)

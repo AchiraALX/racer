@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section>
+    <div class="">
+        <h1>404 Page not found</h1>
+        <p> {{ error }} </p>
+    </div>
+</section>
+
+<section>
+    <div>
+        Jump back <a href="{{ url_for('index') }}">home</a>
+    </div>
+</section>
+
+{% endblock %}

@@ -26,10 +26,11 @@ login_manager.login_view = "racer_auth.login"
 class User(UserMixin):
     """ The user class. """
 
-    def __init__(self, username: str, email: str) -> None:
+    def __init__(self, username: str, email: str, _id: str) -> None:
         """ The user constructor. """
         self.username = username
         self.email = email
+        self._id = _id
 
     def get_id(self) -> str:
         """ Get the user id. """
@@ -45,11 +46,13 @@ def load_user(user_id) -> User:
     try:
         username = logged_user['username']
         email = logged_user['email']
+        _id = logged_user['id']
 
     except NoResultFound:
         raise NoResultFound from NoResultFound
 
     return User(
         username=username,
-        email=email
+        email=email,
+        _id=_id
     )

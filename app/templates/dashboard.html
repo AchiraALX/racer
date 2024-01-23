@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Dashboard</h1>
+    <aside class="row">
+        <section class="col-md-6">
+            <h3>Messages</h3>
+            <div class="message-container">
+                <div class="message w3-padding w3-display w3-border w3-margin-bottom w3-round">
+                    <div class="w3-right">now</div>
+                    <div class="sender">John Doe</div>
+                    <div class="content w3-border-top">Hey, how are you?</div>
+                </div>
+                <div class="message w3-padding w3-display w3-border w3-margin-bottom w3-round">
+                    <div class="w3-right">1 minute ago</div>
+                    <div class="sender">Jane Smith</div>
+                    <div class="content w3-border-top">I'm good, thanks! How about you?</div>
+                </div>
+                <div class="message w3-padding w3-display w3-border w3-margin-bottom w3-round">
+                    <div class="w3-right">2 minutes ago</div>
+                    <div class="sender">John Doe</div>
+                    <div class="content w3-border-top">I'm doing great!</div>
+                </div>
+            </div>
+        </section>
+        <section class="col-md-6">
+            <h3>Mails</h3>
+            <div class="mail-container">
+                <div class="mail w3-padding">
+                    <div class="sender">Jane Smith</div>
+                    <div class="subject">Regarding Project Update</div>
+                    <div class="content">Hi John, I wanted to discuss the latest updates on the project. Can we schedule a meeting?</div>
+                </div>
+                <div class="mail w3-padding">
+                    <div class="sender">John Doe</div>
+                    <div class="subject">Re: Regarding Project Update</div>
+                    <div class="content">Sure, Jane! Let's meet tomorrow at 2 PM. Does that work for you?</div>
+                </div>
+            </div>
+        </section>
+    </aside>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:8001');
+        socket.addEventListener('open', function (event) {
+            socket.send(JSON.stringify({
+                'message': 'Hello from client',
+                'type': 'connect'
+            }));
+        });
+        socket.addEventListener('message', function (event) {
+            console.log('Message from server ', JSON.parse(event.data));
+        });
+    </script>
+{% endblock %}
