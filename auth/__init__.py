@@ -3,6 +3,7 @@
 
 """ The racer authentication module. """
 
+import secrets
 from flask import (
     Blueprint,
     request,
@@ -12,8 +13,7 @@ from flask import (
     url_for
 )
 from flask_login import login_user, logout_user  # type: ignore
-import secrets
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, DBAPIError
 from workers import (
     AddToDBWorker,
     hash_password,
@@ -116,8 +116,8 @@ def register():
             flash("User created successfully")
             return redirect(url_for('racer_auth.login'))
 
-        except Exception as e:
-            flash(f"Error: {e}")
+        except DBAPIError as exc:
+            flash(f"Error: {exc}")
             return redirect(url_for('racer_auth.register'))
 
     return render_template('sign-up.html')

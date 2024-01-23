@@ -5,7 +5,7 @@
 
 from secrets import token_urlsafe
 from flask import Flask
-from flask_login import LoginManager, UserMixin
+from flask_login import LoginManager, UserMixin  # type: ignore
 from sqlalchemy.exc import NoResultFound
 
 from auth import racer_auth
@@ -47,7 +47,7 @@ def load_user(user_id) -> User:
         email = logged_user['email']
 
     except NoResultFound:
-        raise NoResultFound
+        raise NoResultFound from NoResultFound
 
     return User(
         username=username,

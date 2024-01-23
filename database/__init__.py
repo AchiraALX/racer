@@ -5,6 +5,7 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.exc import DBAPIError
 
 from .models import Base
 
@@ -32,9 +33,15 @@ class DBStorage:
     def racer_add(self, racer: object) -> object:
         """ Add a racer to the database """
         session = self.get_session()
-        session.add(racer)
-        session.flush()
-        session.commit()
+
+        try:
+            session.add(racer)
+            session.flush()
+            session.commit()
+
+        except DBAPIError:
+            raise DBAPIError from DBAPIError  # type: ignore
+
         return racer
 
 

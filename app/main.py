@@ -3,14 +3,36 @@
 """ The racer main module. """
 
 from flask import render_template, redirect, url_for, flash
-from flask_login import login_required
+from flask_login import login_required  # type: ignore
 from . import racer
 
 
+# Home racer
 @racer.route("/", methods=["GET"], strict_slashes=False)
 def index():
     """ The racer index route handler. """
     return render_template("racer.html")
+
+
+# About racer
+@racer.route("/about", methods=["GET"], strict_slashes=False)
+def about():
+    """ The racer about route handler. """
+    return render_template("about.html")
+
+
+# Help on racer
+@racer.route("/help", methods=["GET"], strict_slashes=False)
+def racer_help():
+    """ The racer help route handler. """
+    return render_template("help.html")
+
+
+# Racer developer hire
+@racer.route("/hire", methods=["GET"], strict_slashes=False)
+def hire():
+    """ The racer hire route handler. """
+    return render_template("hire.html", hire=True)
 
 
 @racer.route("/profile", methods=["GET"], strict_slashes=False)
