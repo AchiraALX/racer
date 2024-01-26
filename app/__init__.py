@@ -9,6 +9,7 @@ from flask_login import LoginManager, UserMixin  # type: ignore
 from sqlalchemy.exc import NoResultFound
 
 from auth import racer_auth
+from api.v1 import racer_api
 
 from workers import one_user
 
@@ -17,6 +18,7 @@ racer.secret_key = token_urlsafe(16)
 racer.debug = True
 
 racer.register_blueprint(racer_auth)
+racer.register_blueprint(racer_api)
 
 
 login_manager = LoginManager(racer)

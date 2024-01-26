@@ -47,7 +47,13 @@ def profile():
 @login_required
 def dashboard():
     """ The racer dashboard route handler. """
-    return render_template("dashboard.html")
+    return render_template("dashboard.html", client='host', token='token')
+
+
+@racer.route('/client/<token>')
+def client(token: str):
+    """ The racer chat route handler. """
+    return render_template('client.html', token=token, client='client')
 
 
 @racer.errorhandler(404)

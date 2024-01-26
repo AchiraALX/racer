@@ -188,8 +188,7 @@ def save_new_password(token):
 
         if password != confirm_password:
             flash("Passwords do not match")
-            return redirect(
-                url_for('racer_auth.save_new_passwords', token=token))
+            return redirect(request.referrer)
 
         try:
             # Check if token exists

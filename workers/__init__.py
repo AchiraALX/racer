@@ -9,6 +9,7 @@ from typing import Dict, Optional
 from bcrypt import hashpw, checkpw, gensalt
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from database.models.user import User
+from database.models.message import Message
 from database.database import Database
 
 
@@ -27,6 +28,19 @@ class AddToDBWorker():
             return None
 
         return user
+
+    def add_message(self, message: dict) -> Optional[Dict]:
+        """ Add message worker runner """
+        _message = Message(**message)
+        db = Database()
+
+        try:
+            db.racer_add(_message)
+
+        except IntegrityError:
+            return None
+
+        return message
 
 
 class UpdateDBWorker():

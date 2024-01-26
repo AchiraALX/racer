@@ -26,12 +26,12 @@
         <section class="col-md-6">
             <h3>Mails</h3>
             <div class="mail-container">
-                <div class="mail w3-padding">
+                <div class="mail w3-padding w3-margin-bottom">
                     <div class="sender">Jane Smith</div>
                     <div class="subject">Regarding Project Update</div>
                     <div class="content">Hi John, I wanted to discuss the latest updates on the project. Can we schedule a meeting?</div>
                 </div>
-                <div class="mail w3-padding">
+                <div class="mail w3-padding w3-margin-bottom">
                     <div class="sender">John Doe</div>
                     <div class="subject">Re: Regarding Project Update</div>
                     <div class="content">Sure, Jane! Let's meet tomorrow at 2 PM. Does that work for you?</div>
@@ -41,15 +41,189 @@
     </aside>
 
     <script>
-        const socket = new WebSocket('ws://localhost:8001');
+        const messages = document.querySelectorAll('.message');
+        const mails = document.querySelectorAll('.mail');
+        const socket = new WebSocket('wss://localhost:8001');
+
+        messages.forEach((message) => {
+            message.style.cursor = 'pointer';
+            message.addEventListener('click', function (event) {
+                createMessageInterface();
+            });
+        })
+
+        mails.forEach((mail) => {
+            mail.style.cursor = 'pointer';
+            mail.addEventListener('click', function (event) {
+                createMailInterface();
+            });
+        })
+
         socket.addEventListener('open', function (event) {
             socket.send(JSON.stringify({
-                'message': 'Hello from client',
-                'type': 'connect'
+                'type': 'connect',
+                'client': '{{ client }}',
+                'token': 'host_token'
             }));
         });
         socket.addEventListener('message', function (event) {
             console.log('Message from server ', JSON.parse(event.data));
         });
+
+        const createMessageInterface = () => {
+            const modal = document.createElement('div');
+            const modalContent = document.createElement('div');
+            const closeButton = document.createElement('span');
+            modal.classList.add('w3-modal');
+            modalContent.classList.add('w3-display')
+            closeButton.classList.add('w3-button');
+            closeButton.classList.add('w3-display-topright');
+            closeButton.classList.add('w3-round');
+            closeButton.title = 'Close';
+
+            modal.style.display = 'block';
+            closeButton.innerHTML = '<i class="bi bi-x-lg"></i>';
+            closeButton.addEventListener('click', function (event) {
+                closeButton.parentElement.parentElement.remove();
+            });
+            modal.addEventListener('click', function (event) {
+                if (event.target === modal) {
+                    modal.remove();
+                }
+            });
+
+            modalContent.style.backgroundColor = 'honeydew';
+            modalContent.style.height = '100%';
+            modalContent.style.width = '100%';
+            modalContent.style.maxWidth = '1000px';
+            modalContent.style.position = 'fixed';
+            modalContent.style.top = '0';
+            modalContent.style.right = '0';
+
+            modalContent.appendChild(closeButton);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            const name = document.createElement('div');
+            name.classList.add('w3-left');
+            name.classList.add('w3-padding');
+
+            name.textContent = 'John Doe';
+            modalContent.appendChild(name);
+
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('w3-display-container');
+            messageContainer.classList.add('w3-padding');
+            messageContainer.classList.add('w3-margin-top');
+            messageContainer.classList.add('w3-border');
+            messageContainer.style.height = 'calc(100% - 120px)';
+            messageContainer.style.width = '100%';
+            messageContainer.style.overflowY = 'scroll';
+            modalContent.appendChild(messageContainer);
+
+            const message = document.createElement('div');
+            message.classList.add('w3-padding');
+            message.classList.add('w3-display');
+            message.classList.add('w3-border');
+            message.classList.add('w3-round');
+            message.classList.add('w3-margin-bottom');
+            message.style.width = '80%';
+            message.style.backgroundColor = 'white';
+            message.style.position = 'relative';
+            message.style.left = '20%';
+            message.style.top = '20px';
+            message.textContent = 'Hey, how are you?';
+            messageContainer.appendChild(message);
+
+            const message2 = document.createElement('div');
+            message2.classList.add('w3-padding');
+            message2.classList.add('w3-display');
+            message2.classList.add('w3-border');
+            message2.classList.add('w3-round');
+            message2.classList.add('w3-margin-bottom');
+            message2.style.maxWidth = '80%';
+            message2.style.backgroundColor = 'white';
+            message2.style.position = 'relative';
+            message2.style.left = '20%';
+            message2.style.top = '20px';
+            message2.textContent = 'I\'m good, thanks! How about you?';
+            messageContainer.appendChild(message2);
+
+            // Message input
+            const messageInput = document.createElement('input');
+            messageInput.classList.add('w3-input');
+            messageInput.classList.add('w3-border');
+            messageInput.classList.add('w3-round');
+            messageInput.classList.add('w3-padding');
+            messageInput.classList.add('w3-margin');
+            messageInput.classList.add('w3-margin-bottom');
+            messageInput.style.width = 'calc(100% - 40px)';
+            messageInput.style.position = 'relative';
+            messageInput.style.top = '20px';
+            messageInput.placeholder = 'Type a message...';
+            messageInput.addEventListener('keyup', function (event) {
+                if (event.keyCode === 13) {
+                    const message = document.createElement('div');
+                    message.classList.add('w3-padding');
+                    message.classList.add('w3-display');
+                    message.classList.add('w3-border');
+                    message.classList.add('w3-round');
+                    message.classList.add('w3-margin-bottom');
+                    message.style.width = '80%';
+                    message.style.backgroundColor = 'white';
+                    message.style.position = 'relative';
+                    message.style.left = '20%';
+                    message.style.top = '20px';
+                    message.textContent = messageInput.value;
+                    messageContainer.appendChild(message);
+                    messageInput.value = '';
+
+                    // Send message to server
+                    socket.send(JSON.stringify({
+                        type: 'message',
+                        client: 'host',
+                        data: message.textContent
+                    }))
+                }
+            });
+            modalContent.appendChild(messageInput);
+
+        }
+
+        const createMailInterface = () => {
+            const modal = document.createElement('div');
+            const modalContent = document.createElement('div');
+            const closeButton = document.createElement('span');
+            modal.classList.add('w3-modal');
+            modalContent.classList.add('w3-display')
+            modalContent.classList.add('content')
+            closeButton.classList.add('w3-button');
+            closeButton.classList.add('w3-display-topright');
+            closeButton.classList.add('w3-round');
+            closeButton.title = 'Close';
+
+            modal.style.display = 'block';
+            closeButton.innerHTML = '<i class="bi bi-x-lg"></i>';
+            closeButton.addEventListener('click', function (event) {
+                closeButton.parentElement.parentElement.remove();
+            });
+            modal.addEventListener('click', function (event) {
+                if (event.target === modal) {
+                    modal.remove();
+                }
+            });
+
+            modalContent.style.backgroundColor = 'honeydew';
+            modalContent.style.height = '100%';
+            modalContent.style.width = '100%';
+            modalContent.style.maxWidth = '1000px';
+            modalContent.style.position = 'fixed';
+            modalContent.style.top = '0';
+            modalContent.style.right = '0';
+
+            modalContent.appendChild(closeButton);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+        }
     </script>
 {% endblock %}
