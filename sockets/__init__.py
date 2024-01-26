@@ -7,7 +7,7 @@ import secrets
 import redis
 import pika  # type: ignore
 
-REDIS_HOST = "b8a0e18ed7c2"
+REDIS_HOST = ""
 REDIS_PORT = 6379
 
 # Global variables
@@ -15,7 +15,7 @@ connected_clients = {}
 connected_hosts = {}
 
 # Redis client
-redis_client = redis.Redis(host='localhost', port=REDIS_PORT)
+redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 redis_client.ping()
 
 
