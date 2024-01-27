@@ -9,9 +9,15 @@ import signal
 import os
 import subprocess
 import websockets
-from sockets import connect
+from hypercorn.asyncio import serve
+from hypercorn.config import Config
+from sockets import connect, racer_socket
 from workers.rabbit import Broker
 from workers.redis import Cache
+
+
+config = Config()
+config.bind = ["localhost:8000"]
 
 
 async def main():
@@ -64,6 +70,7 @@ if __name__ == '__main__':
 
     # Try to run asynchio server and on KeyboardInterrupt prit exited
     try:
-        asyncio.run(main())
+        asyncio.run(serve(racer_socket, config))
+
     except KeyboardInterrupt:
         print("Exited")

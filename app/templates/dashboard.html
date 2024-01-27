@@ -43,7 +43,7 @@
     <script>
         const messages = document.querySelectorAll('.message');
         const mails = document.querySelectorAll('.mail');
-        const socket = new WebSocket('wss://20.62.199.174:8080');
+        const socket = new WebSocket(`ws://localhost:8000`);
 
         messages.forEach((message) => {
             message.style.cursor = 'pointer';
@@ -183,7 +183,8 @@
                         type: 'message',
                         client: 'host',
                         data: message.textContent
-                    }))
+                    }));
+                    console.log('Message sent to server');
                 }
             });
             modalContent.appendChild(messageInput);

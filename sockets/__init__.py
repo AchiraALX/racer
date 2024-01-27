@@ -4,15 +4,18 @@
 
 import json
 import secrets
+from typing import Dict, Any, Optional
 import redis
 import pika  # type: ignore
+from quart import Quart, websocket
 
-REDIS_HOST = ""
+
+REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 
 # Global variables
-connected_clients = {}
-connected_hosts = {}
+connected_clients: Dict[Any, Any] = {}
+connected_hosts: Dict[Any, Any] = {}
 
 # Redis client
 redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
@@ -25,133 +28,148 @@ rabbit_con = pika.BlockingConnection(
 channel = rabbit_con.channel()
 
 
-# Publish message to rabbitmq
-def publish_messages(message: dict) -> None:
-    """ Publish message to rabbitmq """
-
-    channel.exchange_declare(exchange='messages', exchange_type='fanout')
-    channel.basic_publish(exchange='messages', routing_key='', body=message)
-    print(f" [x] Sent {message}")
+racer_socket = Quart(__name__)
 
 
-# Store message to redis
-def redis_store_message(message: dict) -> None:
-    """ Store message to redis """
+@racer_socket.websocket('/')
+async def connect():
+    """ Connect to the socket """
 
-    key = secrets.token_hex(16)
-    message['id'] = key
-    redis_client.set(key, json.dumps(message))
-    publish_messages(message)
+    con = websocket._get_current_object()  # pylint: disable=protected-access
+
+    try:
+        while True:
+            message = await websocket.receive_json()
+
+            message_type = message.get('type', None)
+
+            if message_type is None:
+                await send_error(con, 'Type not provided')
+                continue
+
+            token = message.get('token', None)
+            if token is None:
+                await send_error(con, 'Token not provided')
+                continue
+
+            if message_type == 'connect':
+                client = message.get('client', None)
+                if client is None:
+                    await send_error(con, 'Client not provided')
+                    continue
+
+                if client == 'guest':
+                    connected_clients[token] = con
+                    await con.send_json({
+                        'type': 'connect',
+                        'message': 'Connected'
+                    })
+                    continue
+
+                if client == 'host':
+                    connected_hosts[token] = con
+                    await con.send_json({
+                        'type': 'connect',
+                        'message': 'Connected'
+                    })
+                    continue
+
+            if message_type == 'message':
+                await con.send_json({
+                    'type': 'message',
+                    'message': 'Message received'
+                })
+                continue
+
+    except ConnectionError:
+        print("Connection error")
+        return
 
 
-async def error(websocket, message: str) -> None:
-    """ Send error message to websocket client """
-
-    body = {
+# Send error message
+async def send_error(_con, message: str) -> None:
+    """ Send error message """
+    await _con.send_json({
         'type': 'error',
         'message': message
-    }
-
-    await websocket.send(json.dumps(body))
+    })
 
 
-async def add_client(websocket, token: str) -> None:
-    """ Add new client to connected_clients """
+# Send message to client
+async def send_message(token: str, message: dict) -> None:
+    """ Send message to client """
 
     if token in connected_clients:
-        return
-    connected_clients[token] = websocket
-    await websocket.send(json.dumps({
-        'type': 'connected',
-        'message': f'Connected to server on {token}'
-    }))
+        con = connected_clients[token]
+        await con.send_json(message)
 
 
-async def add_host(websocket, token: str) -> None:
-    """ Add new host to connected_hosts """
+# Send message to host
+async def send_message_to_host(token: str, message: dict) -> None:
+    """ Send message to host """
 
     if token in connected_hosts:
-        await error(websocket, 'Host already connected')
-        return
-
-    connected_hosts[token] = websocket
-    print(connected_hosts)
-    await websocket.send(json.dumps({
-        'type': 'connected',
-        'message': f'Connected to server on {token}'
-    }))
+        con = connected_hosts[token]
+        await con.send_json(message)
 
 
-async def handle_sending(websocket, message: dict) -> None:
-    """ Handle message """
-
-    await websocket.send(json.dumps({
-        'type': 'message',
-        'message': 'Message received'
-    }))
-
-    to = message.get('to', None)
-    client = message['client']
-    if to is None:
-        await error(websocket, 'Unknown recipient')
-        return
-
-    if client == 'client':
-        if to in connected_clients:
-            redis_store_message(message)
-            await connected_clients[to].send(message)
-            return
-
-    elif client == 'host':
-        if to in connected_hosts:
-            redis_store_message(message)
-            await connected_hosts[to].send(message)
-            return
-
-    else:
-        await error(websocket, "Unable to define the client type")
-
-
-async def handle_connecting(websocket, message: dict) -> None:
-    """ Handle connecting """
+# Check client and connect appropriately
+async def check_client(_con, message: dict) -> bool:
+    """ Filter clients """
 
     client = message.get('client', None)
-    token = message.get('token', None)
+
     if client is None:
-        await error(websocket, 'Unknown client')
-        return
+        await send_error(_con, 'Client not provided')
+        return False
+
+    proceed = False
+    try:
+        proceed = await check_token(_con, message)
+    except TokenException:
+        await send_error(_con, f'Token not provided: {message}')
+        return False
+
+    if proceed:
+        if client == 'guest':
+            connected_clients[message['token']] = _con
+            await _con.send_json({
+                'type': 'connect',
+                'message': 'Connected'
+            })
+            return True
+
+        if client == 'host':
+            connected_hosts[message['token']] = _con
+            await _con.send_json({
+                'type': 'connect',
+                'message': 'Connected'
+            })
+            return True
+
+        await send_error(_con, 'Client not recognized')
+
+    raise ClientException
+
+
+# Check token and connect appropriately
+async def check_token(_con, message: dict) -> bool:
+    """ Filter tokens """
+
+    token = message.get('token', None)
 
     if token is None:
-        await error(websocket, 'Unknown token')
-        return
+        await send_error(_con, 'Token not provided')
+        return False
 
-    if client == 'client':
-        await add_client(websocket, token)
-        return
-
-    if client == 'host':
-        await add_host(websocket, token)
-        return
-
-    await error(websocket, f'Unable to understand the {message}')
+    raise TokenException
 
 
-# Handle connections
-async def connect(websocket):
-    """ Handle new websocket connection """
+# Token exception
+class TokenException(Exception):
+    """ Token exception """
 
-    message = await websocket.recv()
-    _message = json.loads(message)
 
-    if _message['type'] == 'connect':
-        # Add client to connected_clients and host to connected_hosts
-
-        await handle_connecting(websocket, _message)
-        return
-
-    if _message['type'] == 'message':
-        # handle the message
-        await handle_sending(websocket, _message)
-        return
-
-    await error(websocket, 'Unable to dertermine type of message')
+# Client exception
+class ClientException(Exception):
+    """ Client exception """
