@@ -43,6 +43,10 @@
             {% block content %}{% endblock %}
         </div>
     </body>
+    <button class="btn w3-button" id="bot-btn"><i class="bi bi-chat-dots-fill"></i></button>
+    <div id="bot" class="w3-display">
+        <iframe src="{{ url_for('client_ui', bot_token=current_user.bot_token) }}" frameborder="0" class="w3-right"></iframe>
+    </div>
 </main>
 <footer>
     <div class="row">
@@ -61,6 +65,18 @@
 <script>
     const copy = document.getElementById('copy');
     copy.innerHTML = '&copy; ' + new Date().getFullYear() + ' Racer';
+
+    const bot = document.getElementById('bot');
+    const botButton = document.getElementById('bot-btn');
+
+    botButton.onclick = () => {
+        bot.style.right = '0';
+    }
+    bot.onclick = (event) => {
+        if (event.target === bot) {
+            bot.style.right = '-100%';
+        }
+    }
 </script>
 
 </html>

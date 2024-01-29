@@ -2,16 +2,21 @@
 
 """ Socket implementation for racer."""
 
+import asyncio
+import contextlib
 import json
 import secrets
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import redis
 import pika  # type: ignore
-from quart import Quart, websocket
+from quart import Quart, websocket, jsonify
+from quart_cors import cors
 
 
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
+
+RABBITMQ_HOST = '20.127.195.22'
 
 # Global variables
 connected_clients: Dict[Any, Any] = {}
@@ -24,11 +29,12 @@ redis_client.ping()
 
 # Rabbitmq connection
 rabbit_con = pika.BlockingConnection(
-    pika.ConnectionParameters(host='20.127.195.22', port=5672))
+    pika.ConnectionParameters(host='127.0.0.1', port=5672))
 channel = rabbit_con.channel()
 
 
 racer_socket = Quart(__name__)
+cors(racer_socket, allow_origin='*')
 
 
 @racer_socket.websocket('/')
@@ -47,22 +53,22 @@ async def connect():
                 await send_error(con, 'Type not provided')
                 continue
 
-            token = message.get('token', None)
-            if token is None:
-                await send_error(con, 'Token not provided')
+            client = message.get('client', None)
+            if client is None or not client:
+                await send_error(con, 'Client not provided')
                 continue
 
             if message_type == 'connect':
-                client = message.get('client', None)
-                if client is None:
-                    await send_error(con, 'Client not provided')
+                token = message.get('token', None)
+                if token is None:
+                    await send_error(con, 'Token not provided')
                     continue
 
                 if client == 'guest':
                     connected_clients[token] = con
                     await con.send_json({
                         'type': 'connect',
-                        'message': 'Connected'
+                        'message': 'Wrong connection for the host'
                     })
                     continue
 
@@ -70,20 +76,52 @@ async def connect():
                     connected_hosts[token] = con
                     await con.send_json({
                         'type': 'connect',
-                        'message': 'Connected'
+                        'message': 'Received on host message'
                     })
                     continue
 
+            recipient_token = message.get('to', None)
+            if recipient_token is None or not recipient_token:
+                await send_error(con, "Unknown recipient")
+                continue
+
+            src_token = message.get('frm', None)
+            if src_token is None or not src_token:
+                await send_error(con, 'Unkown client')
+                continue
+
             if message_type == 'message':
-                await con.send_json({
-                    'type': 'message',
-                    'message': 'Message received'
-                })
+                await send_message(con, message)
                 continue
 
     except ConnectionError:
         print("Connection error")
         return
+
+    except asyncio.CancelledError:
+        with contextlib.suppress(KeyError):
+            del connected_clients[con]
+        return
+
+
+@racer_socket.get('/<host_token>')
+async def get_conversations(host_token: str):
+    """ Retrieve messages and send them a a json object """
+
+    if host_token is None:
+        return jsonify({'error': 'You have to provide a host token'})
+
+    messages = await retrieve_from_redis(host_token=host_token)
+
+    if messages is None:
+        return jsonify({'info': "Probaly bad token"})
+
+    else:
+        return jsonify({'info': "No messsages or bad token"})
+
+    return jsonify({
+        'messages': messages
+    })
 
 
 # Send error message
@@ -96,73 +134,77 @@ async def send_error(_con, message: str) -> None:
 
 
 # Send message to client
-async def send_message(token: str, message: dict) -> None:
+async def send_message(_con, message: dict) -> None:
     """ Send message to client """
 
-    if token in connected_clients:
-        con = connected_clients[token]
-        await con.send_json(message)
+    print('Trying to send ..... ')
+    print(f'{connected_clients}\n\n{connected_hosts}')
+    print(message)
+
+    frm = message['frm']
+    to = message['to']
+    client = message['client']
+
+    if client == 'host':
+        await connected_hosts[frm].send_json(message)
+        try:
+            await connected_clients[to].send_json(message)
+
+        except KeyError:
+            await send_error(
+                _con,
+                "Not currently connected."
+            )
+
+        finally:
+            save_message(message)
+        return
+
+    if client == 'guest':
+        await connected_clients[frm].send_json(message)
+        try:
+            await connected_hosts[to].send_json(message)
+
+        except KeyError:
+            await send_error(
+                _con,
+                "Host is not currently connected but will leave the message"
+            )
+
+        finally:
+            save_message(message)
+
+        return
+
+    await send_error(_con, 'Something bad happened.')
 
 
-# Send message to host
-async def send_message_to_host(token: str, message: dict) -> None:
-    """ Send message to host """
+# Save message to redis
+def save_message(message: dict) -> None:
+    """ Save message to redis """
 
-    if token in connected_hosts:
-        con = connected_hosts[token]
-        await con.send_json(message)
+    message_id = secrets.token_hex(32)
+    message[id] = message_id
 
-
-# Check client and connect appropriately
-async def check_client(_con, message: dict) -> bool:
-    """ Filter clients """
-
-    client = message.get('client', None)
-
-    if client is None:
-        await send_error(_con, 'Client not provided')
-        return False
-
-    proceed = False
-    try:
-        proceed = await check_token(_con, message)
-    except TokenException:
-        await send_error(_con, f'Token not provided: {message}')
-        return False
-
-    if proceed:
-        if client == 'guest':
-            connected_clients[message['token']] = _con
-            await _con.send_json({
-                'type': 'connect',
-                'message': 'Connected'
-            })
-            return True
-
-        if client == 'host':
-            connected_hosts[message['token']] = _con
-            await _con.send_json({
-                'type': 'connect',
-                'message': 'Connected'
-            })
-            return True
-
-        await send_error(_con, 'Client not recognized')
-
-    raise ClientException
+    redis_client.set(message_id, json.dumps(message))
 
 
-# Check token and connect appropriately
-async def check_token(_con, message: dict) -> bool:
-    """ Filter tokens """
+# Retrieve messages from the redis server
+async def retrieve_from_redis(host_token: str) -> Optional[List]:
+    """ Retrieve messages from the the redis server """
 
-    token = message.get('token', None)
+    message_keys = redis_client.keys('*')
+    host_messages = []
 
-    if token is None:
-        await send_error(_con, 'Token not provided')
-        return False
+    for key in message_keys:  # type: ignore
+        if redis_client.type(key) == b'string':
+            message = redis_client.get(key)
+            message = json.loads(message)  # type: ignore
 
-    raise TokenException
+            if message['to'] == host_token or message['frm'] == host_token:
+                host_messages.append(message)
+
+    return host_messages
 
 
 # Token exception
@@ -173,3 +215,11 @@ class TokenException(Exception):
 # Client exception
 class ClientException(Exception):
     """ Client exception """
+
+
+class HostSendingError(Exception):
+    """ Raises incase socket is unable to send message to host """
+
+
+class GuestSendingError(Exception):
+    """ Raises incase of error sending messagel to guest """

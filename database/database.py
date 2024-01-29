@@ -64,3 +64,30 @@ class Database(DBStorage):
 
         except NoResultFound:
             raise NoResultFound from NoResultFound
+
+    def find_host(self, bot_token: str) -> User:
+        """ Get a user from the database by bot token """
+        session = self.get_session()
+
+        try:
+            user = session.query(User).filter_by(
+                bot_token=bot_token
+            ).one()
+
+        except NoResultFound:
+            raise NoResultFound from NoResultFound
+
+        return user
+
+    def update_bot_token(self, email: str, bot_token: str) -> None:
+        """ Update the bot token """
+        session = self.get_session()
+
+        try:
+            user = session.query(User).filter_by(email=email).one()
+            user.bot_token = bot_token
+            session.flush()
+            session.commit()
+
+        except NoResultFound:
+            raise NoResultFound from NoResultFound

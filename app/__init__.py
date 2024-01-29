@@ -6,6 +6,7 @@
 from secrets import token_urlsafe
 from flask import Flask
 from flask_login import LoginManager, UserMixin  # type: ignore
+from flask_cors import CORS  # type: ignore
 from sqlalchemy.exc import NoResultFound
 
 from auth import racer_auth
@@ -16,6 +17,7 @@ from workers import one_user
 racer = Flask(__name__)
 racer.secret_key = token_urlsafe(16)
 racer.debug = True
+CORS(racer, resources={r"/*": {"origins": "*"}})
 
 racer.register_blueprint(racer_auth)
 racer.register_blueprint(racer_api)
@@ -28,11 +30,14 @@ login_manager.login_view = "racer_auth.login"
 class User(UserMixin):
     """ The user class. """
 
-    def __init__(self, username: str, email: str, _id: str) -> None:
+    def __init__(
+        self, username: str, email: str, _id: str, bot_token: str
+    ) -> None:
         """ The user constructor. """
         self.username = username
         self.email = email
         self._id = _id
+        self.bot_token = bot_token
 
     def get_id(self) -> str:
         """ Get the user id. """
@@ -48,7 +53,8 @@ def load_user(user_id) -> User:
     try:
         username = logged_user['username']
         email = logged_user['email']
-        _id = logged_user['id']
+        _id = logged_user['id'],
+        bot_token = logged_user['botToken']
 
     except NoResultFound:
         raise NoResultFound from NoResultFound
@@ -56,5 +62,6 @@ def load_user(user_id) -> User:
     return User(
         username=username,
         email=email,
-        _id=_id
+        _id=_id,  # type: ignore
+        bot_token=bot_token
     )

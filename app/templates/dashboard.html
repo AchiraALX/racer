@@ -61,9 +61,9 @@
 
         socket.addEventListener('open', function (event) {
             socket.send(JSON.stringify({
-                'type': 'connect',
-                'client': '{{ client }}',
-                'token': 'host_token'
+                type: 'connect',
+                client: '{{ client }}',
+                token: '{{ token }}'
             }));
         });
         socket.addEventListener('message', function (event) {
@@ -181,7 +181,9 @@
                     // Send message to server
                     socket.send(JSON.stringify({
                         type: 'message',
-                        client: 'host',
+                        client: '{{ client }}',
+                        to: ' {{ token }} ',
+                        frm: '{{ token }}',
                         data: message.textContent
                     }));
                     console.log('Message sent to server');
@@ -226,5 +228,14 @@
             modal.appendChild(modalContent);
             document.body.appendChild(modal);
         }
+
+    fetch('http://localhost:8000/{{ token }}')
+    .then((response) => response.json())
+    .then((data) => {
+        alert(JSON.stringify(data))
+    })
+    .catch((errror) => {
+        alert(` Some error occured ${error}`)
+    })
     </script>
 {% endblock %}

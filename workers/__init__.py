@@ -148,3 +148,29 @@ def valid_token(token: str) -> bool:
         raise NoResultFound from NoResultFound
 
     return True
+
+
+# Update the bot_token for a user
+def update_bot_token(email: str, bot_token: str) -> None:
+    """ Update the bot_token for a user """
+
+    db = Database()
+    try:
+        db.update_bot_token(email, bot_token)
+
+    except NoResultFound:
+        raise NoResultFound from NoResultFound
+
+
+# Find host by bot_token
+def find_host(bot_token: str) -> Dict:
+    """ Find host by bot_token """
+
+    db = Database()
+    try:
+        host = db.find_host(bot_token)
+
+    except NoResultFound:
+        raise NoResultFound from NoResultFound
+
+    return host.to_dict()
