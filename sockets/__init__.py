@@ -5,7 +5,7 @@
 import asyncio
 import contextlib
 import json
-import secrets
+import uuid
 from typing import Dict, Any, Optional, List
 import redis
 import pika  # type: ignore
@@ -180,12 +180,15 @@ async def send_message(_con, message: dict) -> None:
 
 
 # Save message to redis
-def save_message(message: dict) -> None:
-    """ Save message to redis """
+def save_message(message):
+    """ Save the message to the redis server """
 
-    message_id = secrets.token_hex(32)
-    message[id] = message_id
+    # Only include keys that are serializable
+    message = {
+        k: v for k, v in message.items() if isinstance(
+            k, (str, int, float, type(None)))}
 
+    message_id = str(uuid.uuid4())
     redis_client.set(message_id, json.dumps(message))
 
 
