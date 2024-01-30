@@ -9,8 +9,13 @@ body {
     padding: 0;
     display: flex;
     flex-direction: column;
-    background-color: rgb(198, 243, 198);
+    background-color: #cfe2ce;
+    color: #2d452f;
     overflow-x: hidden;
+}
+
+header {
+    font-weight: 800;
 }
 
 main {
@@ -143,4 +148,12 @@ li {
     width: 100%;
     max-width: 700px;
 
+}
+
+.hire {
+    background-color: #2d452f;
+    color: #cfe2ce;
+    padding: 5px;
+    text-align: center;
+    font-size: xx-large;
 }

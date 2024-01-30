@@ -11,18 +11,22 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/racer.css') }}">
     <title>Racer</title>
 </head>
+<div class="hire">
+    <!-- Hire link -->
+    <a href="{{ url_for('hire') }}"><i class="bi bi-person-vcard"></i></a>
+</div>
 <header>
-    <div class="w3-display">
+    <div class="w3-display container">
         <div class="w3-left w3-large">
             <a href="{{ url_for('index') }}"> <i class="bi bi-houses-fill"></i> Racer</a>
         </div>
         <div class="w3-right">
             {% if current_user.is_authenticated %}
-            <a href="{{ url_for('dashboard') }}"><span class="w3-margin-right w3-border-right w3-padding">Dashboard</span></a>
-            <a href="{{ url_for('profile') }}"><span class="w3-margin-right w3-border-right w3-padding">Profile</span></a>
-            <a href="{{ url_for('racer_auth.logout') }}"> {{ current_user.username.capitalize() }} &nbsp; <span class="h-icon"><i class="bi bi-box-arrow-right"></i></span></a>
+            <a href="{{ url_for('dashboard') }}" title="Dashboard"><span class="w3-margin-right w3-border-right w3-padding h-icon"><i class="bi bi-pie-chart-fill"></i></span></a>
+            <a href="{{ url_for('profile') }}" title="Profile"><span class="w3-margin-right w3-border-right w3-padding"><span class="h-icon"><i class="bi bi-person-heart"></i></span></span></a>
+            <a href="{{ url_for('racer_auth.logout') }}" title="Logout"><span class="h-icon"><i class="bi bi-box-arrow-right"></i></span></a>
             {% else %}
-                <a href="{{ url_for('racer_auth.login') }}">Log in <span class="h-icon"><i class="bi bi-box-arrow-in-right"></i></span></a>
+                <a href="{{ url_for('racer_auth.login') }}"><span class="h-icon"><i class="bi bi-box-arrow-in-right"></i></span></a>
             {% endif %}
         </div>
     </div>
