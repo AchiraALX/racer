@@ -109,16 +109,37 @@
         const sock = new WebSocket('wss://tcodes.tech');
         text.addEventListener('keyup', (e) => {
             if (e.keyCode === 13) {
-                sendMessage()
-                text.value = '';
+                sendMesage();
             }
         });
 
         send.addEventListener('click', () => {
-            console.log(text.value);
-            sendMessage()
-            text.value = '';
+            sendMesage();
         });
+
+        const sendMesage = () => {
+            console.log(text.value);
+            const message = JSON.stringify({
+                type: 'message',
+                client: '{{ client }}',
+                to: '{{ host }}',
+                frm: '{{ token }}',
+                data: text.value
+            })
+
+            if (text.value.trim() === '') {
+                return;
+            }
+
+            if (text.value.trim() === 'clear') {
+                const body = document.getElementById('body');
+                body.innerHTML = '';
+                text.value = '';
+                return;
+            }
+            sendMessage(message)
+            text.value = '';
+        }
 
         sock.addEventListener('open', () => {
             const connect = JSON.stringify({
@@ -167,27 +188,8 @@
             console.log('Connection closed');
         });
 
-        const sendMessage = () => {
-            console.log(text.value);
-                const message = JSON.stringify({
-                    type: 'message',
-                    client: '{{ client }}',
-                    to: '{{ host }}',
-                    frm: '{{ token }}',
-                    data: text.value
-                })
-
-                if (text.value.trim() === '') {
-                    return;
-                }
-
-                if (text.value.trim() === 'clear') {
-                    const body = document.getElementById('body');
-                    body.innerHTML = '';
-                    text.value = '';
-                    return;
-                }
-            sock.send(message);
+        const sendMessage = (msg) => {
+            sock.send(msg);
         }
     </script>
 </body>
