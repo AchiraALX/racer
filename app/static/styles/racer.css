@@ -9,7 +9,7 @@ body {
     padding: 0;
     display: flex;
     flex-direction: column;
-    background-color: honeydew;
+    background-color: rgb(198, 243, 198);
     overflow-x: hidden;
 }
 

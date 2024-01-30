@@ -43,7 +43,7 @@
     <script>
         const messages = document.querySelectorAll('.message');
         const mails = document.querySelectorAll('.mail');
-        const socket = new WebSocket(`ws://localhost:8000`);
+        const socket = new WebSocket(`wss://tcodes.tech`);
 
         messages.forEach((message) => {
             message.style.cursor = 'pointer';
@@ -228,14 +228,5 @@
             modal.appendChild(modalContent);
             document.body.appendChild(modal);
         }
-
-    fetch('http://localhost:8000/{{ token }}')
-    .then((response) => response.json())
-    .then((data) => {
-        alert(JSON.stringify(data))
-    })
-    .catch((errror) => {
-        alert(` Some error occured ${error}`)
-    })
     </script>
 {% endblock %}

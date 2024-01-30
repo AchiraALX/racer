@@ -29,12 +29,12 @@ redis_client.ping()
 
 # Rabbitmq connection
 rabbit_con = pika.BlockingConnection(
-    pika.ConnectionParameters(host='127.0.0.1', port=5672))
+    pika.ConnectionParameters(host=RABBITMQ_HOST, port=5672))
 channel = rabbit_con.channel()
 
 
 racer_socket = Quart(__name__)
-cors(racer_socket, allow_origin='*')
+cors(racer_socket, allow_origin='*', allow_headers='*')
 
 
 @racer_socket.websocket('/')
