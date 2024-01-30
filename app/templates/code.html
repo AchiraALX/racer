@@ -109,32 +109,14 @@
         const sock = new WebSocket('wss://tcodes.tech');
         text.addEventListener('keyup', (e) => {
             if (e.keyCode === 13) {
-                console.log(text.value);
-                const message = JSON.stringify({
-                    type: 'message',
-                    client: '{{ client }}',
-                    to: '{{ host }}',
-                    frm: '{{ token }}',
-                    data: text.value
-                })
-
-                if (text.value.trim() === '') {
-                    return;
-                }
-
-                if (text.value.trim() === 'clear') {
-                    const body = document.getElementById('body');
-                    body.innerHTML = '';
-                    text.value = '';
-                    return;
-                }
-                sendMessage(message)
+                sendMessage()
                 text.value = '';
             }
         });
 
         send.addEventListener('click', () => {
             console.log(text.value);
+            sendMessage()
             text.value = '';
         });
 
@@ -185,8 +167,27 @@
             console.log('Connection closed');
         });
 
-        const sendMessage = (msg) => {
-            sock.send(msg);
+        const sendMessage = () => {
+            console.log(text.value);
+                const message = JSON.stringify({
+                    type: 'message',
+                    client: '{{ client }}',
+                    to: '{{ host }}',
+                    frm: '{{ token }}',
+                    data: text.value
+                })
+
+                if (text.value.trim() === '') {
+                    return;
+                }
+
+                if (text.value.trim() === 'clear') {
+                    const body = document.getElementById('body');
+                    body.innerHTML = '';
+                    text.value = '';
+                    return;
+                }
+            sock.send(message);
         }
     </script>
 </body>
