@@ -7,7 +7,8 @@ from flask import (
     render_template,
     redirect,
     url_for,
-    flash
+    flash,
+    jsonify
 )
 from flask_login import login_required, current_user  # type: ignore
 from sqlalchemy.exc import NoResultFound
@@ -61,7 +62,9 @@ def client_ui(bot_token: str):
 
     except NoResultFound:
         flash("Unknown host")
-        return redirect(url_for('index'))
+        return jsonify({
+            'error': f'Unknown host: {bot_token}'
+        })
 
     token = secrets.token_urlsafe(16)
     return render_template(
