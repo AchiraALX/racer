@@ -109,10 +109,12 @@
 
     botButton.onclick = () => {
       bot.style.right = "0";
+      manageClose();
     };
     bot.onclick = (event) => {
       if (event.target === bot) {
         bot.style.right = "-100%";
+        manageClose();
       }
     };
 
@@ -200,6 +202,11 @@
 
     // Check if bot element width is less than 600px on window resize
     window.onresize = () => {
+      manageClose();
+    };
+
+    const manageClose = () => {
+      // if the bot width is less than 800px
       if (bot.clientWidth < 800) {
         // Create a close button with inner html of an x-lg icon and append it to the bot element
         const close = document.createElement("div");
@@ -210,10 +217,11 @@
         // Add an onclick event listener to the close button
         close.onclick = () => {
           bot.style.right = "-100%";
+          close.remove();
         };
 
         // Style close button, make it fixed at the middle left of the bot element
-        close.style.position = "fixed";
+        close.style.position = "absolute";
         close.style.top = "50%";
         close.style.left = "0";
         close.style.transform = "translateY(-50%)";
@@ -229,5 +237,6 @@
         }
       }
     };
+    manageClose();
   </script>
 </html>
