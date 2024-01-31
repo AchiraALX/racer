@@ -27,7 +27,7 @@
     />
     <title>Racer</title>
   </head>
-  <div class="hire" style="z-index: 4">
+  <div class="hire" style="z-index: 3">
     <!-- Hire link -->
     <a href="{{ url_for('hire') }}"><i class="bi bi-person-vcard"></i></a>
   </div>
@@ -69,17 +69,17 @@
         <div class="alert alert-info" role="alert">{{ message }}</div>
         {% endfor %} {% endif %} {% endwith %} {% block content %}{% endblock %}
       </div>
+      <button class="btn w3-button" id="bot-btn">
+        <i class="bi bi-chat-dots-fill"></i>
+      </button>
+      <div id="bot" class="w3-display">
+        <iframe
+          src="{{ url_for('client_ui', bot_token='gdQxlPWYu143SLcymCwr3Q') }}"
+          frameborder="0"
+          class="w3-right"
+        ></iframe>
+      </div>
     </body>
-    <button class="btn w3-button" id="bot-btn">
-      <i class="bi bi-chat-dots-fill"></i>
-    </button>
-    <div id="bot" class="w3-display">
-      <iframe
-        src="{{ url_for('client_ui', bot_token='gdQxlPWYu143SLcymCwr3Q') }}"
-        frameborder="0"
-        class="w3-right"
-      ></iframe>
-    </div>
   </main>
   <footer>
     <div class="row">
@@ -197,5 +197,37 @@
     for (let i = 0; i < 100; i++) {
       addShape();
     }
+
+    // Check if bot element width is less than 600px on window resize
+    window.onresize = () => {
+      if (bot.clientWidth < 800) {
+        // Create a close button with inner html of an x-lg icon and append it to the bot element
+        const close = document.createElement("div");
+        close.innerHTML = '<i class="bi bi-x-lg"></i>';
+        close.id = "close";
+        bot.appendChild(close);
+
+        // Add an onclick event listener to the close button
+        close.onclick = () => {
+          bot.style.right = "-100%";
+        };
+
+        // Style close button, make it fixed at the middle left of the bot element
+        close.style.position = "fixed";
+        close.style.top = "50%";
+        close.style.left = "0";
+        close.style.transform = "translateY(-50%)";
+        close.style.fontSize = "200%";
+        close.style.cursor = "pointer";
+        close.style.color = "red";
+        close.style.zIndex = "2";
+      } else {
+        // Remove the close button if the bot element width is greater than 600px
+        const close = document.getElementById("close");
+        if (close) {
+          close.remove();
+        }
+      }
+    };
   </script>
 </html>
