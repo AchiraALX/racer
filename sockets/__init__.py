@@ -80,6 +80,35 @@ async def connect():
                     })
                     continue
 
+            if message_type == 'get':
+                token = message.get('token', None)
+                if token is None:
+                    await send_error(con, 'Token not provided')
+                    continue
+
+                messages = await retrieve_from_redis(token)
+                if messages is None or not messages:
+                    await send_error(con, 'No messages')
+                    continue
+
+                if len(messages) == 0:
+                    await send_error(con, 'No messages')
+                    continue
+
+                if client == 'guest':
+                    await con.send_json({
+                        'type': 'get',
+                        'messages': await retrieve_from_redis(token)
+                    })
+                    continue
+
+                if client == 'host':
+                    await con.send_json({
+                        'type': 'get',
+                        'messages': await retrieve_from_redis(token)
+                    })
+                    continue
+
             recipient_token = message.get('to', None)
             if recipient_token is None or not recipient_token:
                 await send_error(con, "Unknown recipient")

@@ -7,6 +7,7 @@ from secrets import token_urlsafe
 from flask import Flask
 from flask_login import LoginManager, UserMixin  # type: ignore
 from flask_cors import CORS  # type: ignore
+from flask_moment import Moment  # type: ignore
 from sqlalchemy.exc import NoResultFound
 
 from auth import racer_auth
@@ -18,6 +19,7 @@ racer = Flask(__name__)
 racer.secret_key = token_urlsafe(16)
 racer.debug = True
 CORS(racer, resources={r"/*": {"origins": "*"}})
+moment = Moment(racer)
 
 racer.register_blueprint(racer_auth)
 racer.register_blueprint(racer_api)

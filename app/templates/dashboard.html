@@ -1,232 +1,363 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
+<h1>Dashboard</h1>
+<aside class="row">
+  <section class="col-md-6">
+    <h3>Messages</h3>
+    <div class="message-container"></div>
+  </section>
+  <section class="col-md-6">
+    <h3>Mails</h3>
+    <div class="mail-container">
+      <div class="mail w3-padding w3-margin-bottom">
+        <div class="sender">Jane Smith</div>
+        <div class="subject">Regarding Project Update</div>
+        <div class="content">
+          Hi John, I wanted to discuss the latest updates on the project. Can we
+          schedule a meeting?
+        </div>
+      </div>
+      <div class="mail w3-padding w3-margin-bottom">
+        <div class="sender">John Doe</div>
+        <div class="subject">Re: Regarding Project Update</div>
+        <div class="content">
+          Sure, Jane! Let's meet tomorrow at 2 PM. Does that work for you?
+        </div>
+      </div>
+    </div>
+  </section>
+</aside>
 
-{% block content %}
-    <h1>Dashboard</h1>
-    <aside class="row">
-        <section class="col-md-6">
-            <h3>Messages</h3>
-            <div class="message-container">
-                <div class="message w3-padding w3-display w3-border w3-margin-bottom w3-round">
-                    <div class="w3-right">now</div>
-                    <div class="sender">John Doe</div>
-                    <div class="content w3-border-top">Hey, how are you?</div>
-                </div>
-                <div class="message w3-padding w3-display w3-border w3-margin-bottom w3-round">
-                    <div class="w3-right">1 minute ago</div>
-                    <div class="sender">Jane Smith</div>
-                    <div class="content w3-border-top">I'm good, thanks! How about you?</div>
-                </div>
-                <div class="message w3-padding w3-display w3-border w3-margin-bottom w3-round">
-                    <div class="w3-right">2 minutes ago</div>
-                    <div class="sender">John Doe</div>
-                    <div class="content w3-border-top">I'm doing great!</div>
-                </div>
-            </div>
-        </section>
-        <section class="col-md-6">
-            <h3>Mails</h3>
-            <div class="mail-container">
-                <div class="mail w3-padding w3-margin-bottom">
-                    <div class="sender">Jane Smith</div>
-                    <div class="subject">Regarding Project Update</div>
-                    <div class="content">Hi John, I wanted to discuss the latest updates on the project. Can we schedule a meeting?</div>
-                </div>
-                <div class="mail w3-padding w3-margin-bottom">
-                    <div class="sender">John Doe</div>
-                    <div class="subject">Re: Regarding Project Update</div>
-                    <div class="content">Sure, Jane! Let's meet tomorrow at 2 PM. Does that work for you?</div>
-                </div>
-            </div>
-        </section>
-    </aside>
+<script>
+  const messages = document.querySelectorAll(".message");
+  const mails = document.querySelectorAll(".mail");
+  const socket = new WebSocket(`wss://tcodes.tech/`);
 
-    <script>
-        const messages = document.querySelectorAll('.message');
-        const mails = document.querySelectorAll('.mail');
-        const socket = new WebSocket(`wss://tcodes.tech`);
+  messages.forEach((message) => {
+    message.style.cursor = "pointer";
+    message.addEventListener("click", function (event) {
+      createMessageInterface();
+    });
+  });
 
-        messages.forEach((message) => {
-            message.style.cursor = 'pointer';
-            message.addEventListener('click', function (event) {
-                createMessageInterface();
-            });
-        })
+  mails.forEach((mail) => {
+    mail.style.cursor = "pointer";
+    mail.addEventListener("click", function (event) {
+      createMailInterface();
+    });
+  });
 
-        mails.forEach((mail) => {
-            mail.style.cursor = 'pointer';
-            mail.addEventListener('click', function (event) {
-                createMailInterface();
-            });
-        })
+  socket.addEventListener("open", function (event) {
+    socket.send(
+      JSON.stringify({
+        type: "connect",
+        client: "{{ client }}",
+        token: "{{ token }}",
+      })
+    );
+    socket.send(
+      JSON.stringify({
+        type: "get",
+        client: "{{ client }}",
+        token: "{{ token }}",
+      })
+    );
+  });
+  socket.addEventListener("message", function (event) {
+    console.log(JSON.parse(event.data));
+    const messageContainer = document.querySelector(".message-container");
+    const mailContainer = document.querySelector(".mail-container");
+    const data = JSON.parse(event.data);
+    if (data.type === "message") {
+      const message = document.createElement("div");
+      const messaegTemplate = `<div
+        class="message w3-padding w3-display w3-border w3-margin-bottom w3-round convo"
+      >
+        <div class="w3-right">${moment(data.dtime)}</div>
+        <div class="sender" data-guest='${data.frm}'>John Doe</div>
+        <div class="content w3-border-top">${data.data}</div>
+      </div>`;
 
-        socket.addEventListener('open', function (event) {
-            socket.send(JSON.stringify({
-                type: 'connect',
-                client: '{{ client }}',
-                token: '{{ token }}'
-            }));
-        });
-        socket.addEventListener('message', function (event) {
-            console.log('Message from server ', JSON.parse(event.data));
-        });
-
-        const createMessageInterface = () => {
-            const modal = document.createElement('div');
-            const modalContent = document.createElement('div');
-            const closeButton = document.createElement('span');
-            modal.classList.add('w3-modal');
-            modalContent.classList.add('w3-display')
-            closeButton.classList.add('w3-button');
-            closeButton.classList.add('w3-display-topright');
-            closeButton.classList.add('w3-round');
-            closeButton.title = 'Close';
-
-            modal.style.display = 'block';
-            closeButton.innerHTML = '<i class="bi bi-x-lg"></i>';
-            closeButton.addEventListener('click', function (event) {
-                closeButton.parentElement.parentElement.remove();
-            });
-            modal.addEventListener('click', function (event) {
-                if (event.target === modal) {
-                    modal.remove();
-                }
-            });
-
-            modalContent.style.backgroundColor = 'honeydew';
-            modalContent.style.height = '100%';
-            modalContent.style.width = '100%';
-            modalContent.style.maxWidth = '1000px';
-            modalContent.style.position = 'fixed';
-            modalContent.style.top = '0';
-            modalContent.style.right = '0';
-
-            modalContent.appendChild(closeButton);
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-
-            const name = document.createElement('div');
-            name.classList.add('w3-left');
-            name.classList.add('w3-padding');
-
-            name.textContent = 'John Doe';
-            modalContent.appendChild(name);
-
-            const messageContainer = document.createElement('div');
-            messageContainer.classList.add('w3-display-container');
-            messageContainer.classList.add('w3-padding');
-            messageContainer.classList.add('w3-margin-top');
-            messageContainer.classList.add('w3-border');
-            messageContainer.style.height = 'calc(100% - 120px)';
-            messageContainer.style.width = '100%';
-            messageContainer.style.overflowY = 'scroll';
-            modalContent.appendChild(messageContainer);
-
-            const message = document.createElement('div');
-            message.classList.add('w3-padding');
-            message.classList.add('w3-display');
-            message.classList.add('w3-border');
-            message.classList.add('w3-round');
-            message.classList.add('w3-margin-bottom');
-            message.style.width = '80%';
-            message.style.backgroundColor = 'white';
-            message.style.position = 'relative';
-            message.style.left = '20%';
-            message.style.top = '20px';
-            message.textContent = 'Hey, how are you?';
-            messageContainer.appendChild(message);
-
-            const message2 = document.createElement('div');
-            message2.classList.add('w3-padding');
-            message2.classList.add('w3-display');
-            message2.classList.add('w3-border');
-            message2.classList.add('w3-round');
-            message2.classList.add('w3-margin-bottom');
-            message2.style.maxWidth = '80%';
-            message2.style.backgroundColor = 'white';
-            message2.style.position = 'relative';
-            message2.style.left = '20%';
-            message2.style.top = '20px';
-            message2.textContent = 'I\'m good, thanks! How about you?';
-            messageContainer.appendChild(message2);
-
-            // Message input
-            const messageInput = document.createElement('input');
-            messageInput.classList.add('w3-input');
-            messageInput.classList.add('w3-border');
-            messageInput.classList.add('w3-round');
-            messageInput.classList.add('w3-padding');
-            messageInput.classList.add('w3-margin');
-            messageInput.classList.add('w3-margin-bottom');
-            messageInput.style.width = 'calc(100% - 40px)';
-            messageInput.style.position = 'relative';
-            messageInput.style.top = '20px';
-            messageInput.placeholder = 'Type a message...';
-            messageInput.addEventListener('keyup', function (event) {
-                if (event.keyCode === 13) {
-                    const message = document.createElement('div');
-                    message.classList.add('w3-padding');
-                    message.classList.add('w3-display');
-                    message.classList.add('w3-border');
-                    message.classList.add('w3-round');
-                    message.classList.add('w3-margin-bottom');
-                    message.style.width = '80%';
-                    message.style.backgroundColor = 'white';
-                    message.style.position = 'relative';
-                    message.style.left = '20%';
-                    message.style.top = '20px';
-                    message.textContent = messageInput.value;
-                    messageContainer.appendChild(message);
-                    messageInput.value = '';
-
-                    // Send message to server
-                    socket.send(JSON.stringify({
-                        type: 'message',
-                        client: '{{ client }}',
-                        to: ' {{ token }} ',
-                        frm: '{{ token }}',
-                        data: message.textContent
-                    }));
-                    console.log('Message sent to server');
-                }
-            });
-            modalContent.appendChild(messageInput);
-
+      let allConvos = document.querySelectorAll(".convo");
+      allConvos.forEach((convo) => {
+        let token = convo.querySelector(".sender").dataset.guest;
+        if (token === data.frm) {
+          convo.remove();
         }
+      });
+      message.innerHTML = messaegTemplate;
+      messageContainer.insertBefore(message, messageContainer.firstChild);
+    }
 
-        const createMailInterface = () => {
-            const modal = document.createElement('div');
-            const modalContent = document.createElement('div');
-            const closeButton = document.createElement('span');
-            modal.classList.add('w3-modal');
-            modalContent.classList.add('w3-display')
-            modalContent.classList.add('content')
-            closeButton.classList.add('w3-button');
-            closeButton.classList.add('w3-display-topright');
-            closeButton.classList.add('w3-round');
-            closeButton.title = 'Close';
+    if (data.type === "error") {
+      alert(data.data);
+    }
 
-            modal.style.display = 'block';
-            closeButton.innerHTML = '<i class="bi bi-x-lg"></i>';
-            closeButton.addEventListener('click', function (event) {
-                closeButton.parentElement.parentElement.remove();
-            });
-            modal.addEventListener('click', function (event) {
-                if (event.target === modal) {
-                    modal.remove();
-                }
-            });
+    // Get messeges from server and display them
+    if (data.type === "get") {
+      const messages = filterMessages(data.messages);
+      const messageContainer = document.querySelector(".message-container");
+      if (messages.length === 0) {
+        // Write no messages to message container
+        const messaegTemplate = `<div
+          class="w3-padding w3-display w3-border w3-margin-bottom w3-round"
+        >
+            <h2>No messages yet!</h2>
+        </div>`;
+      }
+      for (message in messages) {
+        const messaegTemplate = `<div
+          class="message w3-padding w3-display w3-border w3-margin-bottom w3-round convo"
+        >
+          <div class="w3-right">${moment(messages[message].dtime)}</div>
+          <div class="sender" data-guest='${
+            messages[message].frm
+          }'>John Doe</div>
+          <div class="content w3-border-top">${messages[message].data}</div>
+        </div>`;
+        const messageDiv = document.createElement("div");
+        messageDiv.innerHTML = messaegTemplate;
+        messageContainer.appendChild(messageDiv);
+      }
+    }
+  });
 
-            modalContent.style.backgroundColor = 'honeydew';
-            modalContent.style.height = '100%';
-            modalContent.style.width = '100%';
-            modalContent.style.maxWidth = '1000px';
-            modalContent.style.position = 'fixed';
-            modalContent.style.top = '0';
-            modalContent.style.right = '0';
+  // Sort messages by date newest to oldest
+  const sortMessages = (messages) => {
+    messages.sort((a, b) => {
+      return new Date(b.dtime) - new Date(a.dtime);
+    });
+  };
 
-            modalContent.appendChild(closeButton);
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-        }
-    </script>
+  // Make sure all messages have valid datetime entry and filter out messages that don't
+  const filterMessages = (messages) => {
+    const filteredMessages = [];
+    messages.forEach((message) => {
+      if (message.dtime) {
+        filteredMessages.push(message);
+      }
+    });
+
+    // sort filtered messages
+    sortMessages(filteredMessages);
+
+    // append the messages that were filtered out
+    messages.forEach((message) => {
+      if (!message.dtime) {
+        filteredMessages.push(message);
+      }
+    });
+
+    return filteredMessages;
+  };
+
+  const checkGuestToken = (message) => {
+    if (message.frm !== "{{ token }}") {
+      alert("that is my guest");
+    }
+  };
+
+  const moment = (dateTime) => {
+    try {
+      new Date(dateTime);
+    } catch (error) {
+      return "Racing";
+    }
+    const date = new Date(dateTime);
+    const now = new Date();
+    const diff = now - date;
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (seconds < 60) {
+      return `now`;
+    }
+
+    if (minutes < 60) {
+      return `${minutes} minutes ago`;
+    }
+
+    if (hours < 24) {
+      return `${hours} hours ago`;
+    }
+
+    if (days < 7) {
+      return `${days} days ago`;
+    }
+
+    return date.toDateString();
+  };
+
+  const createMessageInterface = () => {
+    const modal = document.createElement("div");
+    const modalContent = document.createElement("div");
+    const closeButton = document.createElement("span");
+    modal.classList.add("w3-modal");
+    modalContent.classList.add("w3-display");
+    closeButton.classList.add("w3-button");
+    closeButton.classList.add("w3-display-topright");
+    closeButton.classList.add("w3-round");
+    closeButton.title = "Close";
+
+    modal.style.display = "block";
+    closeButton.innerHTML = '<i class="bi bi-x-lg"></i>';
+    closeButton.addEventListener("click", function (event) {
+      closeButton.parentElement.parentElement.remove();
+    });
+    modal.addEventListener("click", function (event) {
+      if (event.target === modal) {
+        modal.remove();
+      }
+    });
+
+    modalContent.style.backgroundColor = "honeydew";
+    modalContent.style.height = "100%";
+    modalContent.style.width = "100%";
+    modalContent.style.maxWidth = "1000px";
+    modalContent.style.position = "fixed";
+    modalContent.style.top = "0";
+    modalContent.style.right = "0";
+
+    modalContent.appendChild(closeButton);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    const name = document.createElement("div");
+    name.classList.add("w3-left");
+    name.classList.add("w3-padding");
+
+    name.textContent = "John Doe";
+    modalContent.appendChild(name);
+
+    const messageContainer = document.createElement("div");
+    messageContainer.classList.add("w3-display-container");
+    messageContainer.classList.add("w3-padding");
+    messageContainer.classList.add("w3-margin-top");
+    messageContainer.classList.add("w3-border");
+    messageContainer.style.height = "calc(100% - 120px)";
+    messageContainer.style.width = "100%";
+    messageContainer.style.overflowY = "scroll";
+    modalContent.appendChild(messageContainer);
+
+    const message = document.createElement("div");
+    message.classList.add("w3-padding");
+    message.classList.add("w3-display");
+    message.classList.add("w3-border");
+    message.classList.add("w3-round");
+    message.classList.add("w3-margin-bottom");
+    message.style.width = "80%";
+    message.style.backgroundColor = "white";
+    message.style.position = "relative";
+    message.style.left = "20%";
+    message.style.top = "20px";
+    message.textContent = "Hey, how are you?";
+    messageContainer.appendChild(message);
+
+    const message2 = document.createElement("div");
+    message2.classList.add("w3-padding");
+    message2.classList.add("w3-display");
+    message2.classList.add("w3-border");
+    message2.classList.add("w3-round");
+    message2.classList.add("w3-margin-bottom");
+    message2.style.maxWidth = "80%";
+    message2.style.backgroundColor = "white";
+    message2.style.position = "relative";
+    message2.style.left = "20%";
+    message2.style.top = "20px";
+    message2.textContent = "I'm good, thanks! How about you?";
+    messageContainer.appendChild(message2);
+
+    // Message input
+    const messageInput = document.createElement("input");
+    messageInput.classList.add("w3-input");
+    messageInput.classList.add("w3-border");
+    messageInput.classList.add("w3-round");
+    messageInput.classList.add("w3-padding");
+    messageInput.classList.add("w3-margin");
+    messageInput.classList.add("w3-margin-bottom");
+    messageInput.style.width = "calc(100% - 40px)";
+    messageInput.style.position = "relative";
+    messageInput.style.top = "20px";
+    messageInput.placeholder = "Type a message...";
+    messageInput.addEventListener("keyup", function (event) {
+      if (event.keyCode === 13) {
+        const message = document.createElement("div");
+        message.classList.add("w3-padding");
+        message.classList.add("w3-display");
+        message.classList.add("w3-border");
+        message.classList.add("w3-round");
+        message.classList.add("w3-margin-bottom");
+        message.style.width = "80%";
+        message.style.backgroundColor = "white";
+        message.style.position = "relative";
+        message.style.left = "20%";
+        message.style.top = "20px";
+        message.textContent = messageInput.value;
+        messageContainer.appendChild(message);
+        messageInput.value = "";
+
+        // Send message to server
+        socket.send(
+          JSON.stringify({
+            type: "message",
+            client: "{{ client }}",
+            to: " {{ token }} ",
+            frm: "{{ token }}",
+            data: message.textContent,
+          })
+        );
+        console.log("Message sent to server");
+      }
+    });
+    modalContent.appendChild(messageInput);
+  };
+
+  const createMailInterface = () => {
+    const modal = document.createElement("div");
+    const modalContent = document.createElement("div");
+    const closeButton = document.createElement("span");
+    modal.classList.add("w3-modal");
+    modalContent.classList.add("w3-display");
+    modalContent.classList.add("content");
+    closeButton.classList.add("w3-button");
+    closeButton.classList.add("w3-display-topright");
+    closeButton.classList.add("w3-round");
+    closeButton.title = "Close";
+
+    modal.style.display = "block";
+    closeButton.innerHTML = '<i class="bi bi-x-lg"></i>';
+    closeButton.addEventListener("click", function (event) {
+      closeButton.parentElement.parentElement.remove();
+    });
+    modal.addEventListener("click", function (event) {
+      if (event.target === modal) {
+        modal.remove();
+      }
+    });
+
+    modalContent.style.backgroundColor = "honeydew";
+    modalContent.style.height = "100%";
+    modalContent.style.width = "100%";
+    modalContent.style.maxWidth = "1000px";
+    modalContent.style.position = "fixed";
+    modalContent.style.top = "0";
+    modalContent.style.right = "0";
+
+    modalContent.appendChild(closeButton);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+  };
+
+  try {
+    fetch("https://tcodes.tech/api", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+</script>
 {% endblock %}
