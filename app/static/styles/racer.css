@@ -172,3 +172,17 @@ li {
 .slide {
   background-color: #cfe2ce;
 }
+
+.message,
+.mail {
+  background-color: #cfe2ce;
+}
+
+.shape {
+  z-index: -1;
+  opacity: 0.1;
+}
+
+form {
+  background-color: #cfe2ce;
+}
