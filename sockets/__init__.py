@@ -16,7 +16,7 @@ from quart_cors import cors
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 
-RABBITMQ_HOST = '20.127.195.22'
+RABBITMQ_HOST = 'localhost'
 
 # Global variables
 connected_clients: Dict[Any, Any] = {}
@@ -109,6 +109,10 @@ async def connect():
                     })
                     continue
 
+            if message_type == 'purge':
+                await send_error(con, 'Not implemented')
+                continue
+
             recipient_token = message.get('to', None)
             if recipient_token is None or not recipient_token:
                 await send_error(con, "Unknown recipient")
@@ -133,24 +137,10 @@ async def connect():
         return
 
 
-@racer_socket.get('/<host_token>')
-async def get_conversations(host_token: str):
-    """ Retrieve messages and send them a a json object """
-
-    if host_token is None:
-        return jsonify({'error': 'You have to provide a host token'})
-
-    messages = await retrieve_from_redis(host_token=host_token)
-
-    if messages is None:
-        return jsonify({'info': "Probaly bad token"})
-
-    else:
-        return jsonify({'info': "No messsages or bad token"})
-
-    return jsonify({
-        'messages': messages
-    })
+# Purge messages
+async def delete_message(message_id: str) -> None:
+    """ Delete message from the redis server """
+    redis_client.delete(message_id)
 
 
 # Send error message

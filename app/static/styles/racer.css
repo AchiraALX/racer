@@ -186,3 +186,17 @@ li {
 form {
   background-color: #cfe2ce;
 }
+
+#purge {
+  background-color: #2d452f;
+  color: #cfe2ce;
+  font-weight: 800;
+}
+
+.options {
+  background-color: aliceblue;
+  color: #2d452f;
+  padding: 0 5px;
+  border-radius: 4px;
+  cursor: pointer;
+}

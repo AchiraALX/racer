@@ -30,7 +30,7 @@
 <script>
   const messages = document.querySelectorAll(".message");
   const mails = document.querySelectorAll(".mail");
-  const socket = new WebSocket(`wss://tcodes.tech/`);
+  const socket = new WebSocket(`ws://${window.location.host}`);
 
   messages.forEach((message) => {
     message.style.cursor = "pointer";

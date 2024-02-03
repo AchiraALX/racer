@@ -4,7 +4,7 @@
 """ The racer main module. """
 
 from secrets import token_urlsafe
-from flask import Flask
+from flask import Flask, url_for, redirect
 from flask_login import LoginManager, UserMixin  # type: ignore
 from flask_cors import CORS  # type: ignore
 from flask_moment import Moment  # type: ignore
@@ -59,7 +59,7 @@ def load_user(user_id) -> User:
         bot_token = logged_user['botToken']
 
     except NoResultFound:
-        raise NoResultFound from NoResultFound
+        return redirect(url_for("racer_auth.login"))  # type: ignore
 
     return User(
         username=username,
