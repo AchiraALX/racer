@@ -1,143 +1,267 @@
-{% extends 'base.html' %}
-
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 
 <div id="hire">
-    <!-- Page Container -->
-<div class="w3-content w3-margin-top" style="max-width:1400px;">
-
+  <!-- Page Container -->
+  <div class="w3-content w3-margin-top" style="max-width: 1400px">
     <!-- The Grid -->
     <div class="w3-row-padding">
-
       <!-- Left Column -->
       <div class="w3-third">
-
         <div class="w3-text-grey w3-card-4 w3-round">
           <div class="w3-display-container w3-round">
-            <img src="{{ url_for('static', filename='media/pass.jpg') }}" style="width:100%" alt="Avatar" class="w3-round">
+            <img
+              src="{{ url_for('static', filename='media/pass.jpg') }}"
+              style="width: 100%"
+              alt="Avatar"
+              class="w3-round"
+            />
             <div class="w3-display-bottomleft w3-container w3-text-black">
               <h2>Jacob Achira</h2>
             </div>
           </div>
-          <br>
-          <div class="w3-container">
-            <p><i class="bi bi-briefcase w3-margin-right w3-large w3-text-teal"></i>Software Engineer (Backend)</p>
-            <p><i class="bi bi-house w3-margin-right w3-large w3-text-teal"></i>Nairobi, Kenya</p>
-            <p><i class="bi bi-envelope w3-margin-right w3-large w3-text-teal"></i>achirajacob9@gmail.com</p>
-            <p><i class="bi bi-phone w3-margin-right w3-large w3-text-teal"></i>(254) 748199786</p>
-            <hr>
+          <br />
+          <div class="w3-container description">
+            <p>
+              <i
+                class="bi bi-briefcase w3-margin-right w3-large w3-text-teal"
+              ></i
+              >Software Engineer (Backend)
+            </p>
+            <p>
+              <i class="bi bi-house w3-margin-right w3-large w3-text-teal"></i
+              >Nairobi, Kenya
+            </p>
+            <p>
+              <i
+                class="bi bi-envelope w3-margin-right w3-large w3-text-teal"
+              ></i
+              >achirajacob9@gmail.com
+            </p>
+            <p>
+              <i class="bi bi-phone w3-margin-right w3-large w3-text-teal"></i
+              >(254) 748199786
+            </p>
+            <hr />
 
-            <p class="w3-large"><b><i class="bi bi-asterisk w3-margin-right w3-text-teal"></i>Skills</b></p>
+            <p class="w3-large">
+              <b
+                ><i class="bi bi-asterisk w3-margin-right w3-text-teal"></i
+                >Skills</b
+              >
+            </p>
             <p>Agile development</p>
             <div class="w3-light-grey w3-round-xlarge w3-small">
-              <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:90%">90%</div>
+              <div
+                class="w3-container w3-center w3-round-xlarge w3-teal"
+                style="width: 90%"
+              >
+                90%
+              </div>
             </div>
             <p>Photography</p>
             <div class="w3-light-grey w3-round-xlarge w3-small">
-              <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:80%">
+              <div
+                class="w3-container w3-center w3-round-xlarge w3-teal"
+                style="width: 80%"
+              >
                 <div class="w3-center w3-text-white">80%</div>
               </div>
             </div>
             <p>Illustrator</p>
             <div class="w3-light-grey w3-round-xlarge w3-small">
-              <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:75%">75%</div>
+              <div
+                class="w3-container w3-center w3-round-xlarge w3-teal"
+                style="width: 75%"
+              >
+                75%
+              </div>
             </div>
             <p>Media</p>
             <div class="w3-light-grey w3-round-xlarge w3-small">
-              <div class="w3-container w3-center w3-round-xlarge w3-teal" style="width:50%">50%</div>
+              <div
+                class="w3-container w3-center w3-round-xlarge w3-teal"
+                style="width: 50%"
+              >
+                50%
+              </div>
             </div>
-            <br>
-            <hr>
-            <br>
+            <br />
+            <hr />
+            <br />
 
-            <p class="w3-large w3-text-theme"><b><i class="bi bi-globe w3-margin-right w3-text-teal"></i>Languages</b></p>
+            <p class="w3-large w3-text-theme">
+              <b
+                ><i class="bi bi-globe w3-margin-right w3-text-teal"></i
+                >Languages</b
+              >
+            </p>
             <p>English</p>
             <div class="w3-light-grey w3-round-xlarge">
-              <div class="w3-round-xlarge w3-teal w3-center" style="height:20px;width:100%">C1</div>
+              <div
+                class="w3-round-xlarge w3-teal w3-center"
+                style="height: 20px; width: 100%"
+              >
+                C1
+              </div>
             </div>
-            <br>
+            <br />
             <p>Kiswahili</p>
             <div class="w3-light-grey w3-round-xlarge">
-              <div class="w3-round-xlarge w3-teal w3-center" style="height:20px;width:100%">C2</div>
+              <div
+                class="w3-round-xlarge w3-teal w3-center"
+                style="height: 20px; width: 100%"
+              >
+                C2
+              </div>
             </div>
-            <br>
+            <br />
           </div>
-        </div><br>
+        </div>
+        <br />
 
-      <!-- End Left Column -->
+        <!-- End Left Column -->
       </div>
 
       <!-- Right Column -->
-      <div class="w3-twothird">
-
+      <div class="w3-twothird description">
         <div class="w3-container w3-card w3-margin-bottom w3-round">
-          <h2 class="w3-text-grey w3-padding-16"><i class="bi bi-suitcase w3-margin-right w3-xxlarge w3-text-teal"></i>Work Experience</h2>
+          <h2 class="w3-text-grey w3-padding-16">
+            <i
+              class="bi bi-suitcase w3-margin-right w3-xxlarge w3-text-teal"
+            ></i
+            >Work Experience
+          </h2>
           <div class="w3-container">
-            <h5 class="w3-opacity"><b>Consultant - CPHRM GROUP · Contract</b></h5>
-            <h6 class="w3-text-teal"><i class="bi bi-calendar w3-margin-right"></i>Nov 2023 - Jan 2023</h6>
-            <p style="text-align: justify;">
-                In my role as a TPQA Data Collection Officer, I diligently gathered and meticulously verified data to ensure high-quality control. My schedule included working Monday to Saturday, during which I conducted household visits, utilized a digital tool for interviews, and conducted thorough visual surveys. I consistently clarified assignment objectives, skillfully investigated responses for accuracy, and carefully cross-checked survey information. Throughout this process, effective communication with my supervisor, prompt reporting, and promptly addressing any issues that arose were crucial aspects of my job. Additionally, my adaptability was evident through taking on extra responsibilities assigned by my supervisor. This experience greatly enhanced my skills in data collection, interviewing, maintaining quality assurance, and creative problem-solving.            </p>
-            <hr>
+            <h5 class="w3-opacity">
+              <b>Consultant - CPHRM GROUP · Contract</b>
+            </h5>
+            <h6 class="w3-text-teal">
+              <i class="bi bi-calendar w3-margin-right"></i>Nov 2023 - Jan 2023
+            </h6>
+            <p style="text-align: justify">
+              As a TPQA Data Collection Officer, I ensured high-quality data by
+              conducting thorough household visits, utilizing digital tools for
+              interviews, and performing visual surveys from Monday to Saturday.
+              I maintained effective communication with my supervisor, clarified
+              assignment objectives, and promptly addressed issues. My
+              adaptability was evident in handling additional responsibilities,
+              enhancing my skills in data collection, quality assurance, and
+              creative problem-solving.
+            </p>
+            <hr />
           </div>
           <div class="w3-container">
-            <h5 class="w3-opacity"><b>Teaching Intern - Mathematics & Geography · Kenyenya SDA Secondary</b></h5>
-            <h6 class="w3-text-teal"><i class="bi bi-calendar w3-margin-right"></i>Jan 2023 - Apr 2023</h6>
-            <p style="text-align: justify;">
-                Throughout my teaching internship from January to April 2023, I had the opportunity to develop valuable skills that are essential for the IT industry. From lesson planning to assessment, I fine-tuned my analytical thinking, keen attention to detail, and strong data management abilities. Being in a fast-paced teaching environment taught me the importance of adaptability and the value of effective communication and collaboration with colleagues. I am proud to have implemented creative teaching techniques and collaborated on interdisciplinary projects, demonstrating my knack for problem-solving and teamwork. I am now eager to utilize these skills in the ever-evolving world of technology and make a meaningful contribution to IT projects.</p>
-            <hr>
+            <h5 class="w3-opacity">
+              <b
+                >Teaching Intern - Mathematics & Geography · Kenyenya SDA
+                Secondary</b
+              >
+            </h5>
+            <h6 class="w3-text-teal">
+              <i class="bi bi-calendar w3-margin-right"></i>Jan 2023 - Apr 2023
+            </h6>
+            <p style="text-align: justify">
+              In my teaching internship (January to April 2023), I developed
+              crucial IT industry skills—analytical thinking, attention to
+              detail, and data management. The experience highlighted
+              adaptability, effective communication, and collaboration.
+              Implementing creative teaching techniques and engaging in
+              interdisciplinary projects showcased my problem-solving and
+              teamwork abilities. Eager to apply these skills in the
+              ever-evolving world of technology.
+            </p>
+            <hr />
           </div>
           <div class="w3-container">
-            <h5 class="w3-opacity"><b>Data Collector - Public Service Commision · Contract</b></h5>
-            <h6 class="w3-text-teal"><i class="bi bi-calendar w3-margin-right"></i>Jun 2022 - July 2022</h6>
-            <p style="text-align: justify;">
-                I successfully conducted household surveys using digital tools, ensuring precise and reliable data collection. I also effectively communicated the goals and procedures of the project to the respondents, promoting a harmonious working relationship. With close collaboration with my supervisors, I executed extensive visual surveys and maintained an efficient data collection process. Additionally, I identified and reported any issues, making valuable contributions to the assurance of data quality.
-            </p><br>
-            <hr>
+            <h5 class="w3-opacity">
+              <b>Data Collector - Public Service Commision · Contract</b>
+            </h5>
+            <h6 class="w3-text-teal">
+              <i class="bi bi-calendar w3-margin-right"></i>Jun 2022 - July 2022
+            </h6>
+            <p style="text-align: justify">
+              Conducted precise household surveys using digital tools, ensuring
+              reliable data collection. Effectively communicated project goals
+              to respondents, fostering a harmonious working relationship.
+              Collaborated closely with supervisors, executing extensive visual
+              surveys and maintaining an efficient data collection process.
+              Identified and reported issues, contributing significantly to data
+              quality assurance.
+            </p>
+            <br />
+            <hr />
           </div>
           <div class="w3-container">
-            <h5 class="w3-opacity"><b>Digital Farmer Registration Enumerator - Kenya Ministry of Agriculture and Livestock Development</b></h5>
-            <h6 class="w3-text-teal"><i class="bi bi-calendar w3-margin-right"></i>Feb 2021 - Feb 2021</h6>
-            <p style="text-align: justify;">
-                By utilizing digital systems, we efficiently registered farmers and maintained accuracy in our data collection. Our team worked seamlessly together to support farmers and ensure a streamlined data collection process. We also met project objectives and deadlines by displaying meticulous attention to detail in our data collection tasks.
+            <h5 class="w3-opacity">
+              <b
+                >Digital Farmer Registration Enumerator - Kenya Ministry of
+                Agriculture and Livestock Development</b
+              >
+            </h5>
+            <h6 class="w3-text-teal">
+              <i class="bi bi-calendar w3-margin-right"></i>Feb 2021 - Feb 2021
+            </h6>
+            <p style="text-align: justify">
+              By utilizing digital systems, we efficiently registered farmers
+              and maintained accuracy in our data collection. Our team worked
+              seamlessly together to support farmers and ensure a streamlined
+              data collection process. We also met project objectives and
+              deadlines by displaying meticulous attention to detail in our data
+              collection tasks.
             </p>
           </div>
         </div>
 
         <div class="w3-container w3-card w3-round">
-          <h2 class="w3-text-grey w3-padding-16"><i class="bi bi-patch-check w3-margin-right w3-xxlarge w3-text-teal"></i>Education</h2>
+          <h2 class="w3-text-grey w3-padding-16">
+            <i
+              class="bi bi-patch-check w3-margin-right w3-xxlarge w3-text-teal"
+            ></i
+            >Education
+          </h2>
           <div class="w3-container">
-            <h5 class="w3-opacity"><b>Udacity / Agile software developer </b></h5>
-            <h6 class="w3-text-teal"><i class="bi bi-calendar w3-margin-right"></i>December 2023 - <span class="w3-tag w3-teal w3-round">Current</span></h6>
+            <h5 class="w3-opacity">
+              <b>Udacity / Agile software developer </b>
+            </h5>
+            <h6 class="w3-text-teal">
+              <i class="bi bi-calendar w3-margin-right"></i>December 2023 -
+              <span class="w3-tag w3-teal w3-round">Current</span>
+            </h6>
             <p>Agile software Developer</p>
-            <hr>
+            <hr />
           </div>
           <div class="w3-container">
             <h5 class="w3-opacity"><b>ALX / Software Engineering</b></h5>
-            <h6 class="w3-text-teal"><i class="bi bi-calendar fa-fw w3-margin-right"></i>January 2023 - January 2024 </h6>
+            <h6 class="w3-text-teal">
+              <i class="bi bi-calendar fa-fw w3-margin-right"></i>January 2023 -
+              January 2024
+            </h6>
             <p>Nanodegree</p>
-            <hr>
+            <hr />
           </div>
           <div class="w3-container">
             <h5 class="w3-opacity"><b>Moi University / Education</b></h5>
-            <h6 class="w3-text-teal"><i class="bi bi-calendar fa-fw w3-margin-right"></i>September 2019 - December 2023</h6>
-            <p>Degree</p><br>
+            <h6 class="w3-text-teal">
+              <i class="bi bi-calendar fa-fw w3-margin-right"></i>September 2019
+              - December 2023
+            </h6>
+            <p>Degree</p>
+            <br />
           </div>
         </div>
 
-      <!-- End Right Column -->
+        <!-- End Right Column -->
       </div>
 
-    <!-- End Grid -->
+      <!-- End Grid -->
     </div>
 
     <!-- End Page Container -->
   </div>
-
 </div>
 
 <script>
-    const hire = document.getElementById('hire');
+  const hire = document.getElementById("hire");
 </script>
 
 {% endblock %}

@@ -52,7 +52,7 @@ def login():
         logged = authenticate_user(email, password)
 
         if logged:
-            from app import load_usered127720@students.mu.ac.ke
+            from app import load_user
 
             try:
                 user = load_user(email)

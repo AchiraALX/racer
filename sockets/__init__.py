@@ -8,8 +8,7 @@ import json
 import uuid
 from typing import Dict, Any, Optional, List
 import redis
-import pika  # type: ignore
-from quart import Quart, websocket, jsonify
+from quart import Quart, websocket
 from quart_cors import cors
 
 
@@ -25,12 +24,6 @@ connected_hosts: Dict[Any, Any] = {}
 # Redis client
 redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 redis_client.ping()
-
-
-# Rabbitmq connection
-rabbit_con = pika.BlockingConnection(
-    pika.ConnectionParameters(host=RABBITMQ_HOST, port=5672))
-channel = rabbit_con.channel()
 
 
 racer_socket = Quart(__name__)
@@ -124,7 +117,12 @@ async def connect():
                 continue
 
             if message_type == 'message':
-                await send_message(con, message)
+                # Create message id
+                new_message = {
+                    'id': str(uuid.uuid4()),
+                    **message
+                }
+                await send_message(con, new_message)
                 continue
 
     except ConnectionError:
@@ -207,7 +205,7 @@ def save_message(message):
         k: v for k, v in message.items() if isinstance(
             k, (str, int, float, type(None)))}
 
-    message_id = str(uuid.uuid4())
+    message_id = message['id']
     redis_client.set(message_id, json.dumps(message))
 
 

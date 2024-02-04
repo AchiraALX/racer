@@ -173,9 +173,10 @@ li {
   background-color: #cfe2ce;
 }
 
-.message,
-.mail {
+.message {
   background-color: #cfe2ce;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
 .shape {
@@ -199,4 +200,8 @@ form {
   padding: 0 5px;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.description {
+  background-color: #cfe2ce;
 }

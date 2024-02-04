@@ -1,43 +1,38 @@
 {% extends 'base.html' %} {% block content %}
-<h1>Dashboard</h1>
-<aside class="row">
-  <section class="col-md-6">
-    <h3>Messages</h3>
+<div class="container">
+  <section>
+    <div class="w3-display">
+      <div id="purge" class="w3-right w3-round w3-padding">Clear</div>
+      <h3 class="w3-padding">Messages</h3>
+    </div>
+    <br />
     <div class="message-container"></div>
   </section>
-  <section class="col-md-6">
-    <h3>Mails</h3>
-    <div class="mail-container">
-      <div class="mail w3-padding w3-margin-bottom">
-        <div class="sender">Jane Smith</div>
-        <div class="subject">Regarding Project Update</div>
-        <div class="content">
-          Hi John, I wanted to discuss the latest updates on the project. Can we
-          schedule a meeting?
-        </div>
-      </div>
-      <div class="mail w3-padding w3-margin-bottom">
-        <div class="sender">John Doe</div>
-        <div class="subject">Re: Regarding Project Update</div>
-        <div class="content">
-          Sure, Jane! Let's meet tomorrow at 2 PM. Does that work for you?
-        </div>
-      </div>
-    </div>
-  </section>
-</aside>
+</div>
 
 <script>
   const messages = document.querySelectorAll(".message");
   const mails = document.querySelectorAll(".mail");
   const socket = new WebSocket(`ws://${window.location.host}`);
 
-  messages.forEach((message) => {
-    message.style.cursor = "pointer";
-    message.addEventListener("click", function (event) {
-      createMessageInterface();
+  const addEventToMessages = () => {
+    const messages = document.querySelectorAll(".message");
+    messages.forEach((message) => {
+      message.style.cursor = "pointer";
+      message.addEventListener("click", function (event) {
+        const id = message.dataset.id;
+        const guest = message.querySelector(".sender").dataset.guest;
+
+        if (id === undefined) {
+          alert("No id");
+        } else {
+          alert(`Sending message to ${guest} with id ${id}`);
+
+          createMessageInterface(guest, id);
+        }
+      });
     });
-  });
+  };
 
   mails.forEach((mail) => {
     mail.style.cursor = "pointer";
@@ -71,7 +66,7 @@
       const message = document.createElement("div");
       const messaegTemplate = `<div
         class="message w3-padding w3-display w3-border w3-margin-bottom w3-round convo"
-      >
+        data-id='${data.id ? data.id : "data"}'>
         <div class="w3-right">${moment(data.dtime)}</div>
         <div class="sender" data-guest='${data.frm}'>John Doe</div>
         <div class="content w3-border-top">${data.data}</div>
@@ -86,10 +81,12 @@
       });
       message.innerHTML = messaegTemplate;
       messageContainer.insertBefore(message, messageContainer.firstChild);
+
+      addEventToMessages();
     }
 
     if (data.type === "error") {
-      alert(data.data);
+      alert(data.message);
     }
 
     // Get messeges from server and display them
@@ -107,7 +104,7 @@
       for (message in messages) {
         const messaegTemplate = `<div
           class="message w3-padding w3-display w3-border w3-margin-bottom w3-round convo"
-        >
+        data-id='${messages[message].id}'>
           <div class="w3-right">${moment(messages[message].dtime)}</div>
           <div class="sender" data-guest='${
             messages[message].frm
@@ -118,6 +115,13 @@
         messageDiv.innerHTML = messaegTemplate;
         messageContainer.appendChild(messageDiv);
       }
+
+      addEventToMessages();
+    }
+
+    if (data.type === "purge") {
+      const messageContainer = document.querySelector(".message-container");
+      messageContainer.innerHTML = "";
     }
   });
 
@@ -189,7 +193,23 @@
     return date.toDateString();
   };
 
-  const createMessageInterface = () => {
+  const purge = document.getElementById("purge");
+  purge.style.cursor = "pointer";
+  purge.addEventListener("click", () => {
+    socket.send(
+      JSON.stringify({
+        type: "purge",
+        client: "{{ client }}",
+      })
+    );
+  });
+
+  const createMessageInterface = (guest, message_id) => {
+    if (message_id === undefined) {
+      alert("No message id");
+      return;
+    }
+
     const modal = document.createElement("div");
     const modalContent = document.createElement("div");
     const closeButton = document.createElement("span");
@@ -227,7 +247,7 @@
     name.classList.add("w3-left");
     name.classList.add("w3-padding");
 
-    name.textContent = "John Doe";
+    name.textContent = "{{ current_user.username.capitalize() }}";
     modalContent.appendChild(name);
 
     const messageContainer = document.createElement("div");
@@ -239,34 +259,6 @@
     messageContainer.style.width = "100%";
     messageContainer.style.overflowY = "scroll";
     modalContent.appendChild(messageContainer);
-
-    const message = document.createElement("div");
-    message.classList.add("w3-padding");
-    message.classList.add("w3-display");
-    message.classList.add("w3-border");
-    message.classList.add("w3-round");
-    message.classList.add("w3-margin-bottom");
-    message.style.width = "80%";
-    message.style.backgroundColor = "white";
-    message.style.position = "relative";
-    message.style.left = "20%";
-    message.style.top = "20px";
-    message.textContent = "Hey, how are you?";
-    messageContainer.appendChild(message);
-
-    const message2 = document.createElement("div");
-    message2.classList.add("w3-padding");
-    message2.classList.add("w3-display");
-    message2.classList.add("w3-border");
-    message2.classList.add("w3-round");
-    message2.classList.add("w3-margin-bottom");
-    message2.style.maxWidth = "80%";
-    message2.style.backgroundColor = "white";
-    message2.style.position = "relative";
-    message2.style.left = "20%";
-    message2.style.top = "20px";
-    message2.textContent = "I'm good, thanks! How about you?";
-    messageContainer.appendChild(message2);
 
     // Message input
     const messageInput = document.createElement("input");
@@ -305,6 +297,7 @@
             to: " {{ token }} ",
             frm: "{{ token }}",
             data: message.textContent,
+            dtime: new Date().toISOString(),
           })
         );
         console.log("Message sent to server");
@@ -348,16 +341,5 @@
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
   };
-
-  try {
-    fetch("https://tcodes.tech/api", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  } catch (error) {
-    console.log(error);
-  }
 </script>
 {% endblock %}
