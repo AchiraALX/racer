@@ -40,6 +40,10 @@
       </div>
       <div class="w3-right">
         {% if current_user.is_authenticated %}
+        <a href="{{ url_for('file_manager') }}" title="Dashboard"
+          ><span class="w3-margin-right w3-border-right w3-padding h-icon"
+            ><i class="bi bi-folder-fill"></i></span
+        ></a>
         <a href="{{ url_for('dashboard') }}" title="Dashboard"
           ><span class="w3-margin-right w3-border-right w3-padding h-icon"
             ><i class="bi bi-pie-chart-fill"></i></span
