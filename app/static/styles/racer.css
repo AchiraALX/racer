@@ -188,12 +188,6 @@ form {
   background-color: #cfe2ce;
 }
 
-#purge {
-  background-color: #2d452f;
-  color: #cfe2ce;
-  font-weight: 800;
-}
-
 .options {
   background-color: aliceblue;
   color: #2d452f;
@@ -204,4 +198,22 @@ form {
 
 .description {
   background-color: #cfe2ce;
+}
+
+.message-options {
+  background-color: #2d452f;
+  color: #cfe2ce;
+  font-weight: 800;
+  display: flex;
+  flex-direction: row;
+}
+
+.message-options div {
+  flex: 1 0 auto;
+  text-align: center;
+  cursor: pointer;
+}
+
+.message-options div:hover {
+  background-color: #4caf50;
 }

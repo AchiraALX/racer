@@ -4,6 +4,8 @@
 """ The workers module. """
 
 
+import datetime
+import json
 from typing import Dict, Optional
 
 from bcrypt import hashpw, checkpw, gensalt
@@ -11,6 +13,7 @@ from sqlalchemy.exc import NoResultFound, IntegrityError
 from database.models.user import User
 from database.models.message import Message
 from database.database import Database
+from .redis import Cache
 
 
 class AddToDBWorker():
@@ -174,3 +177,62 @@ def find_host(bot_token: str) -> Dict:
         raise NoResultFound from NoResultFound
 
     return host.to_dict()
+
+
+# From redis to server if message time > 12 hours
+def to_database() -> None:
+    """ From redis to server if message time > 12 hours """
+
+    add = AddToDBWorker()
+    cache = Cache()
+    messages = cache.get_all_messages()
+
+    for message in messages:
+        message = message.decode('utf-8')
+        message = json.loads(message)
+
+        message_time = datetime.datetime.fromisoformat(message['dtime'])
+
+        if (datetime.datetime.now() - message_time).seconds > 43200:
+            add.add_message(message)
+            cache.delete_message(message['id'])
+
+
+# Get conversations
+def get_conversations(messages: list) -> list:
+    """ Get the available conversations """
+
+    unique = develop_guests(messages=messages)
+    cache = Cache()
+    conversations = list()
+
+    for token in unique:
+        conversations.append(
+            cache.retrieve_messages(token=token)
+        )
+
+    new_conversations = list()
+    for conversation in conversations:
+        new_conversations.append(
+            max(
+                conversation,
+                key=lambda x: datetime.datetime.fromisoformat(x['dtime']))
+        )
+
+    return new_conversations
+
+
+# Develop guests
+def develop_guests(messages: list) -> set:
+    """ Return a set of unique guests """
+
+    guests = set()
+
+    for message in messages:
+        if message['client'] == 'guest':
+            guests.add(message['frm'])
+
+        if message['client'] == ' host':
+            guests.add(message['to'])
+
+    return guests

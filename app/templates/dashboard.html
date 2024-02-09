@@ -2,7 +2,18 @@
 <div class="container">
   <section>
     <div class="w3-display">
-      <div id="purge" class="w3-right w3-round w3-padding">Clear</div>
+      <div class="w3-right w3-round message-options">
+        <div id="purge" class="w3-padding" title="Deletes cached messages">
+          <i class="bi bi-trash"></i> Purge
+        </div>
+        <div
+          id="save"
+          class="w3-padding"
+          title="Saves cached messages to database. For old messages > 12 hours"
+        >
+          <i class="bi bi-save"></i> Save
+        </div>
+      </div>
       <h3 class="w3-padding">Messages</h3>
     </div>
     <br />
@@ -14,6 +25,8 @@
   const messages = document.querySelectorAll(".message");
   const mails = document.querySelectorAll(".mail");
   const socket = new WebSocket(`ws://${window.location.host}`);
+  const token = "{{ token }}";
+  const host = window.location.host;
 
   const addEventToMessages = () => {
     const messages = document.querySelectorAll(".message");
@@ -58,7 +71,7 @@
     );
   });
   socket.addEventListener("message", function (event) {
-    console.log(JSON.parse(event.data));
+    // console.log(JSON.parse(event.data));
     const messageContainer = document.querySelector(".message-container");
     const mailContainer = document.querySelector(".mail-container");
     const data = JSON.parse(event.data);
@@ -91,32 +104,6 @@
 
     // Get messeges from server and display them
     if (data.type === "get") {
-      const messages = filterMessages(data.messages);
-      const messageContainer = document.querySelector(".message-container");
-      if (messages.length === 0) {
-        // Write no messages to message container
-        const messaegTemplate = `<div
-          class="w3-padding w3-display w3-border w3-margin-bottom w3-round"
-        >
-            <h2>No messages yet!</h2>
-        </div>`;
-      }
-      for (message in messages) {
-        const messaegTemplate = `<div
-          class="message w3-padding w3-display w3-border w3-margin-bottom w3-round convo"
-        data-id='${messages[message].id}'>
-          <div class="w3-right">${moment(messages[message].dtime)}</div>
-          <div class="sender" data-guest='${
-            messages[message].frm
-          }'>John Doe</div>
-          <div class="content w3-border-top">${messages[message].data}</div>
-        </div>`;
-        const messageDiv = document.createElement("div");
-        messageDiv.innerHTML = messaegTemplate;
-        messageContainer.appendChild(messageDiv);
-      }
-
-      addEventToMessages();
     }
 
     if (data.type === "purge") {
@@ -203,6 +190,54 @@
       })
     );
   });
+
+  try {
+    let uri;
+    if (host === "localhost") {
+      uri = `http://${host}/api/v1/conversations/{{ token}}`;
+    } else {
+      uri = `https://${host}/api/v1/conversations/{{ token}}`;
+    }
+
+    fetch(uri, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const messages = filterMessages(data.messages);
+        const messageContainer = document.querySelector(".message-container");
+        if (messages.length === 0) {
+          // Write no messages to message container
+          const messaegTemplate = `<div
+          class="w3-padding w3-display w3-border w3-margin-bottom w3-round"
+        >
+            <h2>No messages yet!</h2>
+        </div>`;
+        }
+        for (message in messages) {
+          const messaegTemplate = `<div
+          class="message w3-padding w3-display w3-border w3-margin-bottom w3-round convo"
+        data-id='${messages[message].id}'>
+          <div class="w3-right">${moment(messages[message].dtime)}</div>
+          <div class="sender" data-guest='${
+            messages[message].frm
+          }'>John Doe</div>
+          <div class="content w3-border-top">${messages[message].data}</div>
+        </div>`;
+          const messageDiv = document.createElement("div");
+          messageDiv.innerHTML = messaegTemplate;
+          messageContainer.appendChild(messageDiv);
+        }
+
+        addEventToMessages();
+      });
+  } catch (error) {
+    alert(error);
+  }
 
   const createMessageInterface = (guest, message_id) => {
     if (message_id === undefined) {
@@ -300,46 +335,10 @@
             dtime: new Date().toISOString(),
           })
         );
-        console.log("Message sent to server");
+        // console.log("Message sent to server");
       }
     });
     modalContent.appendChild(messageInput);
-  };
-
-  const createMailInterface = () => {
-    const modal = document.createElement("div");
-    const modalContent = document.createElement("div");
-    const closeButton = document.createElement("span");
-    modal.classList.add("w3-modal");
-    modalContent.classList.add("w3-display");
-    modalContent.classList.add("content");
-    closeButton.classList.add("w3-button");
-    closeButton.classList.add("w3-display-topright");
-    closeButton.classList.add("w3-round");
-    closeButton.title = "Close";
-
-    modal.style.display = "block";
-    closeButton.innerHTML = '<i class="bi bi-x-lg"></i>';
-    closeButton.addEventListener("click", function (event) {
-      closeButton.parentElement.parentElement.remove();
-    });
-    modal.addEventListener("click", function (event) {
-      if (event.target === modal) {
-        modal.remove();
-      }
-    });
-
-    modalContent.style.backgroundColor = "honeydew";
-    modalContent.style.height = "100%";
-    modalContent.style.width = "100%";
-    modalContent.style.maxWidth = "1000px";
-    modalContent.style.position = "fixed";
-    modalContent.style.top = "0";
-    modalContent.style.right = "0";
-
-    modalContent.appendChild(closeButton);
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
   };
 </script>
 {% endblock %}
