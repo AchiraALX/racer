@@ -27,6 +27,9 @@ def get_convo(host: Optional[str]):
         host = request.args.get('host')
 
     if host is None or not host:
+        host = request.headers.get('host')
+
+    if host is None or not host:
         return jsonify({"error": "Host is required"}), 400
 
     cache = Cache()
@@ -44,10 +47,16 @@ def get_conversation(guest: Optional[str]):
         guest = request.args.get('guest')
 
     if guest is None or not guest:
+        guest = request.headers.get('guest')
+
+    if guest is None or not guest:
         return jsonify({"error": "Guest is required"}), 400
 
     cache = Cache()
     messages = [message for message in cache.retrieve_messages(guest)]
+
+    # Sort the messages by dtime timestamp
+    messages.sort(key=lambda x: x['dtime'])
 
     return jsonify(
         {"messages": messages}), 200

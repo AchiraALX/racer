@@ -39,9 +39,12 @@
         if (id === undefined) {
           alert("No id");
         } else {
-          alert(`Sending message to ${guest} with id ${id}`);
-
-          createMessageInterface(guest, id);
+          fetch(`http://${host}/api/v1/conversation/${guest}`)
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              createMessageInterface(guest, id, data);
+            });
         }
       });
     });
@@ -239,7 +242,13 @@
     alert(error);
   }
 
-  const createMessageInterface = (guest, message_id) => {
+  /**
+   * Create a message interface
+   * @param {string} guest
+   * @param {string} message_id
+   * @param {object} data
+   */
+  const createMessageInterface = (guest, message_id, data) => {
     if (message_id === undefined) {
       alert("No message id");
       return;
@@ -285,15 +294,40 @@
     name.textContent = "{{ current_user.username.capitalize() }}";
     modalContent.appendChild(name);
 
-    const messageContainer = document.createElement("div");
-    messageContainer.classList.add("w3-display-container");
-    messageContainer.classList.add("w3-padding");
-    messageContainer.classList.add("w3-margin-top");
-    messageContainer.classList.add("w3-border");
-    messageContainer.style.height = "calc(100% - 120px)";
-    messageContainer.style.width = "100%";
-    messageContainer.style.overflowY = "scroll";
-    modalContent.appendChild(messageContainer);
+    const allMessagesContainer = document.createElement("div");
+    allMessagesContainer.classList.add("w3-padding");
+    allMessagesContainer.classList.add("w3-margin-top");
+    allMessagesContainer.classList.add("w3-border");
+    allMessagesContainer.style.height = "calc(100% - 120px)";
+    allMessagesContainer.style.width = "100%";
+    allMessagesContainer.style.overflowY = "scroll";
+    modalContent.appendChild(allMessagesContainer);
+
+    for (message in data.messages) {
+      // Check if the sender is the a guest
+      const messageBody = document.createElement("div");
+      const messageContainer = document.createElement("div");
+
+      messageContainer.textContent = data.messages[message].data;
+      messageContainer.style.width = "fit-content";
+      messageContainer.classList.add("w3-padding");
+      messageContainer.classList.add("w3-round");
+      messageContainer.style.maxWidth = "60%";
+      messageContainer.style.marginBottom = "3px";
+      messageContainer.style.textAlign = "justify";
+      messageBody.style.position = "relative";
+      messageBody.style.display = "flex";
+      messageBody.appendChild(messageContainer);
+      allMessagesContainer.appendChild(messageBody);
+
+      if (message.frm !== "{{ token }}") {
+        messageContainer.classList.add("w3-green");
+        messageBody.style.justifyContent = "flex-start";
+      } else {
+        messageContainer.classList.add("w3-blue");
+        messageBody.style.justifyContent = "flex-end";
+      }
+    }
 
     // Message input
     const messageInput = document.createElement("input");
@@ -309,20 +343,25 @@
     messageInput.placeholder = "Type a message...";
     messageInput.addEventListener("keyup", function (event) {
       if (event.keyCode === 13) {
-        const message = document.createElement("div");
-        message.classList.add("w3-padding");
-        message.classList.add("w3-display");
-        message.classList.add("w3-border");
-        message.classList.add("w3-round");
-        message.classList.add("w3-margin-bottom");
-        message.style.width = "80%";
-        message.style.backgroundColor = "white";
-        message.style.position = "relative";
-        message.style.left = "20%";
-        message.style.top = "20px";
-        message.textContent = messageInput.value;
-        messageContainer.appendChild(message);
-        messageInput.value = "";
+        // Check if the sender is the a guest
+        const messageBody = document.createElement("div");
+        const messageContainer = document.createElement("div");
+
+        messageContainer.textContent = messageInput.value;
+        messageContainer.style.width = "fit-content";
+        messageContainer.classList.add("w3-padding");
+        messageContainer.classList.add("w3-round");
+        messageContainer.style.maxWidth = "60%";
+        messageContainer.style.marginBottom = "3px";
+        messageContainer.style.textAlign = "justify";
+        messageBody.style.position = "relative";
+        messageBody.style.display = "flex";
+        messageBody.style.justifyContent = "flex-end";
+        messageBody.appendChild(messageContainer);
+        allMessagesContainer.appendChild(messageBody);
+        messageContainer.classList.add("w3-blue");
+        allMessagesContainer.appendChild(message);
+        messageInput.value = null;
 
         // Send message to server
         socket.send(

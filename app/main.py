@@ -94,14 +94,6 @@ def dashboard():
     return render_template("dashboard.html", client='host', token=token)
 
 
-# File manager
-@racer.route("/file_manager", methods=["GET"], strict_slashes=False)
-@login_required
-def file_manager():
-    """ The racer file manager route handler. """
-    return render_template("file_manager.html")
-
-
 @racer.errorhandler(404)
 def page_not_found(error):
     """ The racer 404 error handler. """

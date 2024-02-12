@@ -5,5 +5,33 @@
 <!-- Your content here -->
 
 {% block content %}
-<h3 class="w3-center">File manager</h3>
-{% endblock %}
+<div class="container">
+  <h3 class="w3-center">File manager</h3>
+
+  {% if files %} {{ files [0]}}
+  <table class="w3-table w3-striped w3-bordered w3-border w3-hoverable">
+    <tr>
+      <th>File</th>
+      <th>Size</th>
+      <th>Actions</th>
+    </tr>
+    {% for file in files %}
+    <tr>
+      <td>{{ file.name }}</td>
+      <td>{{ file.size }}</td>
+      <td>
+        <a href="" class="w3-button w3-blue">Download</a>
+        <a href="" class="w3-button w3-red">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="w3-center">No files found</p>
+</div>
+
+<script>
+  let savedFiles = "{{ files }}";
+  console.log(savedFiles);
+</script>
+{% endif %} {% endblock %}

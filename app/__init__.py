@@ -12,6 +12,7 @@ from sqlalchemy.exc import NoResultFound
 
 from auth import racer_auth
 from api.v1 import racer_api
+from file import racer_file
 
 from workers import one_user
 
@@ -23,6 +24,7 @@ moment = Moment(racer)
 
 racer.register_blueprint(racer_auth)
 racer.register_blueprint(racer_api)
+racer.register_blueprint(racer_file)
 
 
 login_manager = LoginManager(racer)
