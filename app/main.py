@@ -91,7 +91,11 @@ def dashboard():
             flash("Unknown user")
             return redirect(url_for('index'))
 
-    return render_template("dashboard.html", client='host', token=token)
+    return render_template(
+        "dashboard.html",
+        client='host',
+        token=token
+    )
 
 
 @racer.errorhandler(404)
