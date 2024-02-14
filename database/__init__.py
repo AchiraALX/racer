@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 """ The racer db module """
-
+import contextlib
+from typing import Union
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from .models import Base
 
@@ -30,19 +31,11 @@ class DBStorage:
         """ Get a session """
         return self.session()
 
-    def racer_add(self, racer: object) -> object:
-        """ Add a racer to the database """
-        session = self.get_session()
+    def close_session(self) -> None:
+        """Close current session
+        """
 
-        try:
-            session.add(racer)
-            session.flush()
-            session.commit()
-
-        except DBAPIError:
-            raise DBAPIError from DBAPIError  # type: ignore
-
-        return racer
+        self.get_session().close()
 
 
 if __name__ == "__main__":

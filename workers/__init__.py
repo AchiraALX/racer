@@ -1,64 +1,92 @@
 #!/usr/bin/env python3
 
 
-""" The workers module. """
+""" The workers' module. """
 
 
 import datetime
 import json
-from typing import Dict, Optional
+from typing import Dict, Optional, Type, Any, List, Set, TypeVar
 
 from bcrypt import hashpw, checkpw, gensalt
-from sqlalchemy.exc import NoResultFound, IntegrityError
+from sqlalchemy.exc import NoResultFound, IntegrityError, SQLAlchemyError
 from database.models.user import User
 from database.models.message import Message
 from database.database import Database
 from .redis import Cache
 
 
-class AddToDBWorker():
-    """ The add user worker class. """
+def add_message(message: dict) -> Optional[Dict]:
+    """ Add message worker runner """
+    _message = Message(**message)
+    db = Database()
 
-    def add_user(self, user: Dict) -> Optional[Dict]:
-        """ Add user worker runner """
-        _user = User(**user)
-        db = Database()
+    try:
+        db.racer_add(_message)
 
-        try:
-            db.racer_add(_user)
+    except IntegrityError:
+        raise IntegrityError from IntegrityError
 
-        except IntegrityError:
-            return None
-
-        return user
-
-    def add_message(self, message: dict) -> Optional[Dict]:
-        """ Add message worker runner """
-        _message = Message(**message)
-        db = Database()
-
-        try:
-            db.racer_add(_message)
-
-        except IntegrityError:
-            return None
-
-        return message
+    return message
 
 
-class UpdateDBWorker():
-    """ The update user worker class. """
+def add_user(user: Dict) -> Optional[User]:
+    """ Add user worker runner """
+    _user = User(**user)
+    db = Database()
 
-    def __init__(self, username: str, email: str, password: str) -> None:
-        """ Update user worker constructor """
-        self.username = username
-        self.email = email
-        self.password = password
+    user = db.save_user(_user)
+
+    if user is None:
+        return None
+
+    return user
+
+
+def update_message(fields: Dict[str, Any], message_id: str) -> Type[Message]:
+    """Update message
+
+    fields: -> Message field to update [str, Any]
+    message_id: -> Message id
+
+    Return:
+        message -> Type[Message]
+    """
+
+    db = Database()
+    try:
+        message = db.update_message(fields=fields, message_id=message_id)
+
+    except NoResultFound:
+        raise NoResultFound from NoResultFound
+
+    return message
+
+
+def update_user(fields: Dict, email: str) -> Type[User]:
+    """Update user details
+
+    fields -> Dict
+    """
+
+    db = Database()
+
+    try:
+        user = db.update_user(fields=fields, email=email)
+
+    except NoResultFound:
+        raise NoResultFound from NoResultFound
+
+    return user
 
 
 # Hash the password using bcrypt
 def hash_password(password: str) -> str:
-    """ Hash the password """
+    """Hash the password
+
+    Arguments:
+        password -> str
+    """
     salt = gensalt(10)
     hashed_password = hashpw(password.encode('utf-8'), salt)
     return hashed_password.decode('utf-8')
@@ -86,7 +114,7 @@ def authenticate_user(email: str, password: str) -> bool:
 
 
 # Get a user
-def one_user(email: str) -> Dict:
+def one_user(email: str) -> Dict[str, Any]:
     """ Query one user from the database """
 
     db = Database()
@@ -183,7 +211,6 @@ def find_host(bot_token: str) -> Dict:
 def to_database() -> None:
     """ From redis to server if message time > 12 hours """
 
-    add = AddToDBWorker()
     cache = Cache()
     messages = cache.get_all_messages()
 
@@ -194,24 +221,24 @@ def to_database() -> None:
         message_time = datetime.datetime.fromisoformat(message['dtime'])
 
         if (datetime.datetime.now() - message_time).seconds > 43200:
-            add.add_message(message)
+            add_message(message)
             cache.delete_message(message['id'])
 
 
 # Get conversations
-def get_conversations(messages: list) -> list:
+def get_conversations(messages: List) -> List:
     """ Get the available conversations """
 
     unique = develop_guests(messages=messages)
     cache = Cache()
-    conversations = list()
+    conversations = []
 
     for token in unique:
         conversations.append(
             cache.retrieve_messages(token=token)
         )
 
-    new_conversations = list()
+    new_conversations = []
     for conversation in conversations:
         new_conversations.append(
             max(
@@ -223,7 +250,7 @@ def get_conversations(messages: list) -> list:
 
 
 # Develop guests
-def develop_guests(messages: list) -> set:
+def develop_guests(messages: List) -> Set:
     """ Return a set of unique guests """
 
     guests = set()

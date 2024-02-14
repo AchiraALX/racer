@@ -15,7 +15,7 @@ from flask import (
 from flask_login import login_user, logout_user, current_user  # type: ignore
 from sqlalchemy.exc import NoResultFound, DBAPIError
 from workers import (
-    AddToDBWorker,
+    add_user,
     hash_password,
     authenticate_user,
     user_exists,
@@ -23,9 +23,6 @@ from workers import (
     valid_token,
     update_password
 )
-
-add = AddToDBWorker()
-
 
 racer_auth = Blueprint("racer_auth", __name__, url_prefix="/auth")
 
@@ -118,7 +115,7 @@ def register():
         }
 
         try:
-            add.add_user(user)
+            add_user(user)
             flash("User created successfully")
             return redirect(url_for('racer_auth.login'))
 

@@ -4,4 +4,4 @@
 """Testing worksers
 """
 
-from workers import AddToDBWorker
+from workers import *

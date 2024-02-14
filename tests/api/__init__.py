@@ -10,9 +10,10 @@ from app.main import racer
 
 @pytest.fixture()
 def app():
-    app = racer()
-    app.config.update({
+    """ App instance """
+    racer_app = racer()
+    racer_app.config.update({
         "TESTING": True
     })
 
-    yield app
+    yield racer_app
