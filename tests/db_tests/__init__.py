@@ -33,7 +33,7 @@ class TestDatabase(unittest.TestCase):
             password='mypassword'
         )
         try:
-            db.racer_add(_user)
+            db.save_user(_user)
 
         except IntegrityError:
             raise IntegrityError from IntegrityError
@@ -44,6 +44,13 @@ class TestDatabase(unittest.TestCase):
         user = db.get_user(email='test@email.com')
 
         return self.assertTrue(user.email, 'test@email.com')
+
+    def test_delete_user_success(self):
+        """Delete user passes"""
+
+        db = Database(0)
+
+        db.de
 
 
 if __name__ == "__main__":

@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
 """ The racer db module """
-import contextlib
-from typing import Union
+from typing import Optional
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from .models import Base
 
@@ -31,11 +29,12 @@ class DBStorage:
         """ Get a session """
         return self.session()
 
-    def close_session(self) -> None:
+    @staticmethod
+    def close_session(session: Session) -> Optional[None]:
         """Close current session
         """
 
-        self.get_session().close()
+        session.close()
 
 
 if __name__ == "__main__":

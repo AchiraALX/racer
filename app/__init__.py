@@ -3,8 +3,9 @@
 
 """ The racer main module. """
 
+from typing import Union
 from secrets import token_urlsafe
-from flask import Flask, url_for, redirect
+from flask import Flask, url_for, redirect, Response
 from flask_login import LoginManager, UserMixin  # type: ignore
 from flask_cors import CORS  # type: ignore
 from flask_moment import Moment  # type: ignore
@@ -12,7 +13,6 @@ from sqlalchemy.exc import NoResultFound
 
 from auth import racer_auth
 from api.v1 import racer_api
-from file import racer_file
 
 from workers import one_user
 
@@ -24,7 +24,6 @@ moment = Moment(racer)
 
 racer.register_blueprint(racer_auth)
 racer.register_blueprint(racer_api)
-racer.register_blueprint(racer_file)
 
 
 login_manager = LoginManager(racer)
@@ -49,7 +48,7 @@ class User(UserMixin):
 
 
 @login_manager.user_loader
-def load_user(user_id) -> User:
+def load_user(user_id) -> Union[User, Response]:
     """ Load the user. """
 
     logged_user = one_user(user_id)
@@ -57,15 +56,15 @@ def load_user(user_id) -> User:
     try:
         username = logged_user['username']
         email = logged_user['email']
-        _id = logged_user['id'],
+        _id = logged_user['id']
         bot_token = logged_user['botToken']
 
     except NoResultFound:
-        return redirect(url_for("racer_auth.login"))  # type: ignore
+        return redirect(url_for("racer_auth.login"))
 
     return User(
         username=username,
         email=email,
-        _id=_id,  # type: ignore
+        _id=_id,
         bot_token=bot_token
     )

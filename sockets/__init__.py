@@ -113,7 +113,7 @@ async def connect():
 
             src_token = message.get('frm', None)
             if src_token is None or not src_token:
-                await send_error(con, 'Unkown client')
+                await send_error(con, 'Unknown client')
                 continue
 
             if message_type == 'message':
@@ -138,7 +138,7 @@ async def connect():
 # Purge messages
 async def delete_message(message_id: str) -> None:
     """ Delete message from the redis server """
-    redis_client.delete(message_id)
+    await redis_client.delete(message_id)
 
 
 # Send error message
@@ -170,7 +170,7 @@ async def send_message(_con, message: dict) -> None:
         except KeyError:
             await send_error(
                 _con,
-                "Not currently connected."
+                f"Not currently connected.{to}"
             )
 
         finally:
@@ -211,7 +211,7 @@ def save_message(message):
 
 # Retrieve messages from the redis server
 async def retrieve_from_redis(host_token: str) -> Optional[List]:
-    """ Retrieve messages from the the redis server """
+    """ Retrieve messages from the redis server """
 
     message_keys = redis_client.keys('*')
     host_messages = []
@@ -221,7 +221,7 @@ async def retrieve_from_redis(host_token: str) -> Optional[List]:
             message = redis_client.get(key)
             message = json.loads(message)  # type: ignore
 
-            if message['to'] == host_token or message['frm'] == host_token:
+            if host_token in (message['to'], message['frm']):
                 host_messages.append(message)
 
     return host_messages
@@ -242,4 +242,4 @@ class HostSendingError(Exception):
 
 
 class GuestSendingError(Exception):
-    """ Raises incase of error sending messagel to guest """
+    """ Raises in case of error sending message to guest """

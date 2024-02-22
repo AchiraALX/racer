@@ -35,6 +35,8 @@ def add_user(user: Dict) -> Optional[User]:
     _user = User(**user)
     db = Database()
 
+    user['password'] = hash_password(password=user['password'])
+
     user = db.save_user(_user)
 
     if user is None:
